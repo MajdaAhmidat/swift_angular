@@ -1,0 +1,310 @@
+<app-topbar
+  pageTitle="Recherche des virements"
+  breadcrumb="Accueil › Virements › Recherche"
+  primaryLabel="Nouveau virement"
+  secondaryLabel="Exporter">
+</app-topbar>
+
+<div class="page-body stagger">
+
+  <!-- STATS ──────────────────── -->
+  <div class="stats-grid stats-grid--4">
+    <div class="stat-card">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Total virements</span>
+        <div class="stat-card__icon">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--navy-700)" stroke-width="2">
+            <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card__value">4 821</div>
+      <div class="stat-card__trend stat-card__trend--up">↑ +12% ce mois</div>
+    </div>
+
+    <div class="stat-card stat-card--green">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Rapprochés</span>
+        <div class="stat-card__icon stat-card__icon--green">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--success)" stroke-width="2">
+            <path d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card__value" style="color:var(--success)">4 797</div>
+      <div class="stat-card__trend stat-card__trend--up">Taux 99.5%</div>
+    </div>
+
+    <div class="stat-card stat-card--red">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Non rapprochés</span>
+        <div class="stat-card__icon stat-card__icon--red">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--danger)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card__value" style="color:var(--danger)">24</div>
+      <div class="stat-card__trend stat-card__trend--down">↓ Action requise</div>
+    </div>
+
+    <div class="stat-card stat-card--teal">
+      <div class="stat-card__header">
+        <span class="stat-card__label">Montant total</span>
+        <div class="stat-card__icon stat-card__icon--teal">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--teal-600)" stroke-width="2">
+            <circle cx="12" cy="12" r="9"/><path d="M12 8v8m-3-5h6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card__value" style="color:var(--teal-600)">382M</div>
+      <div class="stat-card__trend">MAD ce mois</div>
+    </div>
+  </div>
+
+  <!-- FORMULAIRE ──────────────────── -->
+  <div class="bmce-card" style="margin-bottom:16px;">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Critères de recherche
+      </div>
+      <button class="btn btn--ghost btn--sm" (click)="resetFiltre()">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 109-9H3"/><path d="M3 3v6h6"/></svg>
+        Réinitialiser
+      </button>
+    </div>
+    <div class="bmce-card__body">
+
+      <!-- Ligne 1 -->
+      <div class="form-grid form-grid--4" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label class="form-label">Référence virement</label>
+          <input type="text" class="form-control" placeholder="VIR-2026-XXXX" [(ngModel)]="filtre.reference">
+        </div>
+        <div class="form-group">
+          <label class="form-label">SOP</label>
+          <select class="form-control" [(ngModel)]="filtre.sop">
+            <option value="">Tous les SOP</option>
+            <option *ngFor="let s of sops" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date du</label>
+          <input type="date" class="form-control" [(ngModel)]="filtre.dateDebut">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date au</label>
+          <input type="date" class="form-control" [(ngModel)]="filtre.dateFin">
+        </div>
+      </div>
+
+      <!-- Ligne 2 -->
+      <div class="form-grid form-grid--4" style="margin-bottom:14px;">
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-control" [(ngModel)]="filtre.statut">
+            <option value="">Tous les statuts</option>
+            <option value="rapproche">Rapproché</option>
+            <option value="non-rapproche">Non rapproché</option>
+            <option value="en-attente">En attente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Émetteur (BIC)</label>
+          <input type="text" class="form-control" placeholder="Ex: BKCMMAMC" [(ngModel)]="filtre.emetteurBic">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Montant min (MAD)</label>
+          <input type="number" class="form-control" placeholder="0" [(ngModel)]="filtre.montantMin">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Montant max (MAD)</label>
+          <input type="number" class="form-control" placeholder="999 999 999" [(ngModel)]="filtre.montantMax">
+        </div>
+      </div>
+
+      <!-- Section Comptes -->
+      <div class="section-divider">Recherche par numéro de compte</div>
+      <div class="form-grid form-grid--2" style="margin-bottom:4px;">
+        <div class="form-group">
+          <label class="form-label">N° compte bénéficiaire</label>
+          <div class="search-wrapper">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" class="form-control form-control--search"
+              placeholder="IBAN ou compte interne — min. 4 caractères"
+              [(ngModel)]="filtre.compteBeneficiaire">
+          </div>
+          <div class="form-hint">IBAN ex: MA64 0220 0000 0456 • Saisie partielle acceptée</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">N° compte donneur d'ordre</label>
+          <div class="search-wrapper">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" class="form-control form-control--search"
+              placeholder="IBAN ou compte interne — min. 4 caractères"
+              [(ngModel)]="filtre.compteDonneurOrdre">
+          </div>
+          <div class="form-hint">IBAN ex: MA64 0011 1000 0123 • Saisie partielle acceptée</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="bmce-card__footer">
+      <button class="btn btn--ghost btn--sm" (click)="resetFiltre()">Réinitialiser</button>
+      <button class="btn btn--primary">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Lancer la recherche
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTRES DIRECTION + STATUT ──────────────────── -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+
+    <div class="dir-toggle">
+      <button class="dir-btn" [class.dir-btn--active]="directionActive()==='tous'" (click)="setDirection('tous')">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+        </svg>
+        Tous <span class="dir-btn__count">4 821</span>
+      </button>
+      <button class="dir-btn" [class.dir-btn--active]="directionActive()==='emis'" (click)="setDirection('emis')">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+        Émis <span class="dir-btn__count">{{ countEmis }}</span>
+      </button>
+      <button class="dir-btn" [class.dir-btn--active]="directionActive()==='recus'" (click)="setDirection('recus')">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 12H5M11 18l-6-6 6-6"/>
+        </svg>
+        Reçus <span class="dir-btn__count">{{ countRecus }}</span>
+      </button>
+    </div>
+
+    <div style="width:1px;height:24px;background:var(--gray-200);"></div>
+
+    <div class="filter-chips">
+      <div class="chip" [class.chip--active]="statutActif()==='tous'"          (click)="setStatut('tous')">Tous</div>
+      <div class="chip" [class.chip--active]="statutActif()==='rapproche'"     (click)="setStatut('rapproche')">Rapprochés</div>
+      <div class="chip" [class.chip--active]="statutActif()==='non-rapproche'" (click)="setStatut('non-rapproche')">Non rapprochés</div>
+      <div class="chip" [class.chip--active]="statutActif()==='en-attente'"    (click)="setStatut('en-attente')">En attente</div>
+    </div>
+
+    <div style="margin-left:auto;font-size:11px;color:var(--gray-400);font-weight:600;">
+      {{ virementsFiltres.length }} résultat(s)
+    </div>
+  </div>
+
+  <!-- TABLEAU ──────────────────── -->
+  <div class="bmce-table-wrap">
+    <div class="bmce-table-wrap__header">
+      <div class="bmce-table-wrap__title">Résultats — {{ virementsFiltres.length }} virements</div>
+      <div style="display:flex;gap:6px;font-size:11px;color:var(--gray-400);align-items:center;">
+        <span style="display:flex;align-items:center;gap:3px;font-weight:700;">
+          <div class="dir-icon dir-icon--emis" style="width:16px;height:16px;border-radius:2px;">
+            <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="var(--navy-700)" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div> Émis
+        </span>
+        <span style="display:flex;align-items:center;gap:3px;font-weight:700;margin-left:6px;">
+          <div class="dir-icon dir-icon--recus" style="width:16px;height:16px;border-radius:2px;">
+            <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="var(--success)" stroke-width="2.5"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          </div> Reçus
+        </span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;"></th>
+          <th>Référence</th>
+          <th>Donneur d'ordre</th>
+          <th>Bénéficiaire</th>
+          <th>Montant</th>
+          <th>SOP</th>
+          <th>Date valeur</th>
+          <th>Statut</th>
+          <th style="width:130px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of virementsFiltres" [routerLink]="['/virements/consulter', v.id]">
+
+          <td>
+            <div class="dir-icon" [class.dir-icon--emis]="v.direction==='emis'" [class.dir-icon--recus]="v.direction==='recus'">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24"
+                [attr.stroke]="v.direction==='emis' ? 'var(--navy-700)' : 'var(--success)'" stroke-width="2.5">
+                <ng-container *ngIf="v.direction==='emis'"><path d="M5 12h14M13 6l6 6-6 6"/></ng-container>
+                <ng-container *ngIf="v.direction==='recus'"><path d="M19 12H5M11 18l-6-6 6-6"/></ng-container>
+              </svg>
+            </div>
+          </td>
+
+          <td><span class="ref-code">{{ v.ref }}</span></td>
+
+          <td>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-700);">{{ v.emetteur }}</div>
+            <div style="font-size:10px;color:var(--gray-400);font-weight:700;letter-spacing:.2px;margin-top:1px;">{{ v.emetteurBic }}</div>
+          </td>
+
+          <td>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-600);">{{ v.beneficiaire }}</div>
+            <div class="iban-code" style="font-size:10px;color:var(--gray-400);margin-top:1px;">{{ v.beneficiaireIban }}</div>
+          </td>
+
+          <td>
+            <span class="amount" [class.amount--emis]="v.direction==='emis'" [class.amount--recus]="v.direction==='recus'">
+              {{ v.direction === 'emis' ? '−' : '+' }} {{ v.montant | number:'1.0-0' }} MAD
+            </span>
+          </td>
+
+          <td><span class="badge badge--navy">{{ v.sop }}</span></td>
+          <td style="font-size:11.5px;color:var(--gray-500);font-weight:600;">{{ v.date }}</td>
+
+          <td><span class="badge" [ngClass]="badgeClass(v.statut)">{{ badgeLabel(v.statut) }}</span></td>
+
+          <td (click)="$event.stopPropagation()">
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn--secondary btn--sm" [routerLink]="['/virements/consulter', v.id]">Consulter</button>
+              <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', v.id]">MX</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="virementsFiltres.length === 0"
+      style="padding:48px;text-align:center;color:var(--gray-400);">
+      <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="var(--gray-300)" stroke-width="1.5"
+        style="display:block;margin:0 auto 10px;">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <div style="font-size:13px;font-weight:700;">Aucun virement trouvé</div>
+      <div style="font-size:11px;margin-top:4px;">Modifiez vos filtres pour afficher des résultats</div>
+    </div>
+
+    <div class="pagination">
+      <div class="pagination__info">1–{{ virementsFiltres.length }} sur 4 821 résultats</div>
+      <div class="pagination__buttons">
+        <div class="pagination__btn">‹</div>
+        <div class="pagination__btn pagination__btn--active">1</div>
+        <div class="pagination__btn">2</div>
+        <div class="pagination__btn">3</div>
+        <div class="pagination__btn">…</div>
+        <div class="pagination__btn">482</div>
+        <div class="pagination__btn">›</div>
+      </div>
+    </div>
+  </div>
+
+</div>

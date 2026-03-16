@@ -1,0 +1,70 @@
+<app-topbar
+  pageTitle="Messages MX ISO 20022"
+  breadcrumb="Accueil › Virements › Messages MX"
+  secondaryLabel="Télécharger XML">
+</app-topbar>
+
+<div class="page-body stagger">
+
+  <!-- Header virement -->
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+    <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/consulter', virementId]">← Retour au virement</button>
+    <div>
+      <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--bmce-navy);">VIR-2026-{{ virementId }}</div>
+      <div style="font-size:11px;color:var(--gray-400);">Messages ISO 20022 échangés via SWIFT GPI</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <span class="badge badge--green">2 messages</span>
+      <span class="badge badge--navy">SOP-001</span>
+    </div>
+  </div>
+
+  <!-- Onglets messages -->
+  <div class="bmce-card">
+    <div class="bmce-card__header">
+      <div class="tabs">
+        <button *ngFor="let msg of messages"
+          class="tab" [class.tab--active]="ongletActif === msg.id"
+          (click)="setOnglet(msg.id)">
+          {{ msg.label }}
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="badge badge--green">{{ messageActif.statut | titlecase }}</span>
+        <span style="font-size:11px;color:var(--gray-400);">{{ messageActif.dateHeure }}</span>
+      </div>
+    </div>
+
+    <div class="bmce-card__body">
+
+      <!-- Infos -->
+      <div class="detail-grid" style="margin-bottom:16px;">
+        <div class="detail-item">
+          <div class="detail-item__label">Type message</div>
+          <div class="detail-item__value detail-item__value--mono detail-item__value--navy">{{ messageActif.id }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item__label">Réseau</div>
+          <div class="detail-item__value">{{ messageActif.network }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item__label">Date / Heure</div>
+          <div class="detail-item__value">{{ messageActif.dateHeure }}</div>
+        </div>
+      </div>
+
+      <!-- XML viewer -->
+      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;">Contenu XML</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn--ghost btn--sm">Copier</button>
+          <button class="btn btn--secondary btn--sm">Télécharger</button>
+        </div>
+      </div>
+
+      <div class="mx-box" [innerHTML]="messageActif.xml"></div>
+
+    </div>
+  </div>
+
+</div>

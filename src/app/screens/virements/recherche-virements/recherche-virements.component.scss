@@ -1,0 +1,53 @@
+// Styles spécifiques — Recherche virements
+// Le reste vient du design system global (styles.scss)
+
+.stats-grid { margin-bottom: 20px; }
+
+.search-card {
+  margin-bottom: 18px;
+
+  .account-separator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0 14px;
+
+    &__line { flex: 1; height: 1px; background: var(--gray-200); }
+
+    &__label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bmce-navy-light);
+      border: 1.5px solid var(--bmce-navy-pale);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--bmce-navy);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+  }
+}
+
+.dir-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  &__divider {
+    width: 1px;
+    height: 32px;
+    background: var(--gray-200);
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+}

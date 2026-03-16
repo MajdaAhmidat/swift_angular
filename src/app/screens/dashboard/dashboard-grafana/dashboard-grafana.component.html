@@ -1,0 +1,32 @@
+<app-topbar
+  pageTitle="Accueil"
+  breadcrumb="Accueil › Dashboard"
+  secondaryLabel="Ouvrir Grafana dans un nouvel onglet">
+</app-topbar>
+
+<div class="page-body grafana-embed">
+  <div class="grafana-embed__toolbar">
+    <a
+      [href]="grafanaUrl()"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="grafana-embed__link">
+      Ouvrir dans Grafana
+    </a>
+    <span class="grafana-embed__refresh">Rafraîchissement auto : {{ refreshLabel }}</span>
+  </div>
+
+  <!-- Message d'aide si "LOCALHOST EST BLOQUÉ" -->
+  <div class="grafana-embed__help">
+    <strong>Le dashboard ne s'affiche pas ?</strong> Grafana doit autoriser l’affichage dans une iframe :
+    dans le dossier <code>conf</code> de Grafana, créez <code>custom.ini</code> avec <code>[security]</code> et <code>allow_embedding = true</code>, puis redémarrez Grafana.
+    <a [href]="grafanaUrl()" target="_blank" rel="noopener noreferrer" class="grafana-embed__help-link">Ouvrir Grafana dans un nouvel onglet →</a>
+  </div>
+
+  <iframe
+    class="grafana-embed__iframe"
+    [src]="grafanaUrl() | safeResourceUrl"
+    title="Accueil - Dashboard"
+    loading="eager">
+  </iframe>
+</div>
