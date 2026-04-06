@@ -1,0 +1,74 @@
+<app-topbar
+  pageTitle="Droits utilisateur"
+  breadcrumb="Accueil › Administration › Droits"
+  primaryLabel="Enregistrer les droits">
+</app-topbar>
+
+<div class="page-body stagger">
+
+  <!-- Profils prédéfinis -->
+  <div class="bmce-card" style="margin-bottom:16px;">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--bmce-navy)" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        Profils prédéfinis
+      </div>
+      <span style="font-size:11px;color:var(--gray-400);">Appliquer un profil écrase les permissions actuelles</span>
+    </div>
+    <div class="bmce-card__body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn--ghost" (click)="appliquerProfil('lecteur')">
+          <span class="badge badge--gray">Lecteur</span> — Consultation uniquement
+        </button>
+        <button class="btn btn--ghost" (click)="appliquerProfil('operateur')">
+          <span class="badge badge--navy">Opérateur</span> — Saisie + consultation
+        </button>
+        <button class="btn btn--ghost" (click)="appliquerProfil('superviseur')">
+          <span class="badge badge--orange">Superviseur</span> — Validation + gestion
+        </button>
+        <button class="btn btn--ghost" (click)="appliquerProfil('administrateur')">
+          <span class="badge badge--red">Administrateur</span> — Accès complet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau permissions -->
+  <div class="bmce-table-wrap">
+    <div class="bmce-table-wrap__header">
+      <div class="bmce-table-wrap__title">Permissions par module</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th style="text-align:center;">Lire</th>
+          <th style="text-align:center;">Créer</th>
+          <th style="text-align:center;">Modifier</th>
+          <th style="text-align:center;">Supprimer</th>
+          <th style="text-align:center;">Valider</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of modules">
+          <td><span style="font-weight:600;font-size:13px;">{{ m.label }}</span></td>
+          <td style="text-align:center;"><input type="checkbox" [(ngModel)]="m.lire"     style="width:16px;height:16px;accent-color:var(--bmce-navy);cursor:pointer;"></td>
+          <td style="text-align:center;"><input type="checkbox" [(ngModel)]="m.creer"    style="width:16px;height:16px;accent-color:var(--bmce-navy);cursor:pointer;"></td>
+          <td style="text-align:center;"><input type="checkbox" [(ngModel)]="m.modifier" style="width:16px;height:16px;accent-color:var(--bmce-navy);cursor:pointer;"></td>
+          <td style="text-align:center;"><input type="checkbox" [(ngModel)]="m.supprimer"style="width:16px;height:16px;accent-color:var(--bmce-navy);cursor:pointer;"></td>
+          <td style="text-align:center;"><input type="checkbox" [(ngModel)]="m.valider"  style="width:16px;height:16px;accent-color:var(--bmce-navy);cursor:pointer;"></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="padding:14px 18px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--gray-100);">
+      <button class="btn btn--ghost" routerLink="/administration/rechercher">Annuler</button>
+      <button class="btn btn--primary">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+        Enregistrer les droits
+      </button>
+    </div>
+  </div>
+
+</div>

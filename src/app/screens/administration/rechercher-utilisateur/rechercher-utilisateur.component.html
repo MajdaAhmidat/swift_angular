@@ -1,0 +1,98 @@
+<app-topbar
+  pageTitle="Rechercher un utilisateur"
+  breadcrumb="Accueil › Administration › Recherche"
+  primaryLabel="Créer un utilisateur">
+</app-topbar>
+
+<div class="page-body stagger">
+
+  <!-- Filtre -->
+  <div class="bmce-card" style="margin-bottom:16px;">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">Filtres de recherche</div>
+    </div>
+    <div class="bmce-card__body">
+      <div class="form-grid form-grid--4">
+        <div class="form-group">
+          <label class="form-label">Nom / Prénom</label>
+          <div class="search-wrapper">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#94A3B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="form-control form-control--search" placeholder="Rechercher..." [(ngModel)]="filtre.nom">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Département</label>
+          <select class="form-control" [(ngModel)]="filtre.departement">
+            <option value="">Tous</option>
+            <option *ngFor="let d of departements" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profil</label>
+          <select class="form-control" [(ngModel)]="filtre.profil">
+            <option value="">Tous</option>
+            <option value="lecteur">Lecteur</option>
+            <option value="operateur">Opérateur</option>
+            <option value="superviseur">Superviseur</option>
+            <option value="administrateur">Administrateur</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-control" [(ngModel)]="filtre.statut">
+            <option value="">Tous</option>
+            <option value="actif">Actif</option>
+            <option value="inactif">Inactif</option>
+            <option value="suspendu">Suspendu</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste utilisateurs -->
+  <div class="bmce-card">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">{{ usersFiltres.length }} utilisateur(s)</div>
+    </div>
+    <div class="bmce-card__body" style="padding:12px;">
+      <div *ngFor="let u of usersFiltres; let i = index"
+        style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--gray-50);border-radius:9px;border:1px solid var(--gray-100);margin-bottom:8px;transition:all .15s;cursor:pointer;"
+        (mouseover)="$event.target && ($any($event.target).style.background='var(--bmce-navy-light)')"
+        (mouseout)="$event.target && ($any($event.target).style.background='var(--gray-50)')">
+
+        <!-- Avatar -->
+        <div [style.background]="avatarColor(i)"
+          style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0;font-family:'Sora',sans-serif;">
+          {{ u.initiales }}
+        </div>
+
+        <!-- Infos -->
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:13px;">{{ u.nom }}</div>
+          <div style="font-size:11px;color:var(--gray-400);">{{ u.poste }} · {{ u.dept }}</div>
+        </div>
+
+        <!-- Badges -->
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge" [ngClass]="badgeProfil(u.profil)">{{ labelProfil(u.profil) }}</span>
+          <span class="badge" [ngClass]="badgeStatut(u.statut)">{{ u.statut | titlecase }}</span>
+        </div>
+
+        <div style="font-size:11px;color:var(--gray-400);min-width:80px;text-align:right;">{{ u.derniere }}</div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn--secondary btn--sm" [routerLink]="['/administration/modifier', u.id]">Modifier</button>
+          <button class="btn btn--ghost btn--sm" [routerLink]="['/administration/droits', u.id]">Droits</button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="usersFiltres.length === 0" style="padding:40px;text-align:center;">
+        <div style="font-size:14px;color:var(--gray-400);">Aucun utilisateur trouvé</div>
+      </div>
+    </div>
+  </div>
+
+</div>
