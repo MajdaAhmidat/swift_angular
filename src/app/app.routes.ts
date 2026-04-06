@@ -1,13 +1,33 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard/grafana',
-    pathMatch: 'full'
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./shared/components/login/login.component')
+        .then(m => m.LoginComponent),
+    title: 'Connexion — BMCE'
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./shared/components/login/login.component')
+        .then(m => m.LoginComponent),
+    title: 'Connexion — BMCE'
+  },
+  {
+    path: 'profil',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/profile/profile.component')
+        .then(m => m.ProfileComponent),
+    title: 'Mon profil — BMCE'
   },
   {
     path: 'virements',
+    canActivate: [authGuard],
     children: [
       {
         path: 'recherche',
@@ -41,20 +61,17 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     children: [
       {
         path: 'non-rapproches',
-        loadComponent: () =>
-          import('./screens/dashboard/dashboard-non-rapproches/dashboard-non-rapproches.component')
-            .then(m => m.DashboardNonRaprochesComponent),
-        title: 'Dashboard Non rapprochés — BMCE'
+        redirectTo: 'grafana',
+        pathMatch: 'full'
       },
       {
         path: 'rapproches',
-        loadComponent: () =>
-          import('./screens/dashboard/dashboard-rapproches/dashboard-rapproches.component')
-            .then(m => m.DashboardRaprochesComponent),
-        title: 'Dashboard Rapprochés — BMCE'
+        redirectTo: 'grafana',
+        pathMatch: 'full'
       },
       {
         path: 'grafana',
@@ -62,11 +79,18 @@ export const routes: Routes = [
           import('./screens/dashboard/dashboard-grafana/dashboard-grafana.component')
             .then(m => m.DashboardGrafanaComponent),
         title: 'Accueil — BMCE'
+      },
+      {
+        path: '',
+        redirectTo: 'grafana',
+        pathMatch: 'full'
       }
     ]
   },
   {
     path: 'administration',
+    canActivate: [authGuard],
+    data: { roles: ['ADMIN'] },
     children: [
       {
         path: 'creer-utilisateur',
@@ -98,5 +122,5 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '**', redirectTo: 'virements/recherche' }
+  { path: '**', redirectTo: 'login' }
 ];

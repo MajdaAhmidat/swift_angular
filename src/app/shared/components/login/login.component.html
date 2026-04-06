@@ -1,0 +1,32 @@
+<div class="login-page">
+  <div class="login-shell">
+    <header class="login-brand">
+      <img class="login-brand__logo" src="logo-bmce.png" alt="BANK OF AFRICA · BMCE Group">
+    </header>
+
+    <form class="login-card" (ngSubmit)="onSubmit()">
+      <h1>Connexion à l'espace Banc Of Africa</h1>
+      <p class="login-card__subtitle">
+        Merci de saisir vos identifiants professionnels.
+      </p>
+
+      <label>
+        Email professionnel
+        <input type="email" [(ngModel)]="email" name="email" required />
+      </label>
+
+      <label>
+        Mot de passe
+        <input type="password" [(ngModel)]="password" name="password" required />
+      </label>
+
+      <button type="submit" class="btn btn--primary btn--lg">Se connecter</button>
+
+      <div class="login-card__error" *ngIf="error">{{ error }}</div>
+    </form>
+
+    <footer class="login-footer">
+      <span>Plateforme interne — Bank of Africa · BMCE Group</span>
+    </footer>
+  </div>
+</div>

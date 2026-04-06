@@ -4,7 +4,7 @@
   primaryLabel="Enregistrer les modifications">
 </app-topbar>
 
-<div class="page-body stagger">
+<div class="page-body stagger" *ngIf="!loading">
   <div class="gap-row">
 
     <!-- Formulaire modification -->
@@ -17,9 +17,14 @@
           </svg>
           Modifier les informations
         </div>
-        <span class="badge badge--green">Compte actif</span>
+        <span class="badge" [ngClass]="user.actif ? 'badge--green' : 'badge--gray'">
+          {{ user.actif ? 'Compte actif' : 'Compte inactif' }}
+        </span>
       </div>
       <div class="bmce-card__body">
+
+        <p class="profile-message error" *ngIf="error">{{ error }}</p>
+        <p class="profile-message success" *ngIf="messageSuccess">{{ messageSuccess }}</p>
 
         <div class="section-divider">Identité</div>
         <div class="form-grid form-grid--2" style="margin-bottom:14px;">
@@ -32,61 +37,43 @@
             <input type="text" class="form-control" [(ngModel)]="user.nom">
           </div>
           <div class="form-group">
-            <label class="form-label">Email professionnel</label>
-            <input type="email" class="form-control" [(ngModel)]="user.email">
+            <label class="form-label">Email (login)</label>
+            <input type="email" class="form-control" [(ngModel)]="user.login">
           </div>
           <div class="form-group">
-            <label class="form-label">Téléphone</label>
-            <input type="tel" class="form-control" [(ngModel)]="user.telephone">
+            <label class="form-label">Nouveau mot de passe</label>
+            <input type="password" class="form-control" placeholder="Laisser vide pour ne pas modifier" [(ngModel)]="user.motdepasse">
           </div>
         </div>
 
-        <div class="section-divider">Poste & Accès</div>
+        <div class="section-divider">Rôle & Accès</div>
         <div class="form-grid form-grid--2" style="margin-bottom:14px;">
           <div class="form-group">
-            <label class="form-label">Département</label>
-            <select class="form-control" [(ngModel)]="user.departement">
-              <option *ngFor="let d of departements" [value]="d">{{ d }}</option>
+            <label class="form-label">Rôle</label>
+            <select class="form-control" [(ngModel)]="user.roleId">
+              <option *ngFor="let r of roles" [ngValue]="r.idRole">{{ r.label }} ({{ r.code }})</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Poste</label>
-            <input type="text" class="form-control" [(ngModel)]="user.poste">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Profil</label>
-            <select class="form-control" [(ngModel)]="user.profil">
-              <option value="lecteur">Lecteur</option>
-              <option value="operateur">Opérateur</option>
-              <option value="superviseur">Superviseur</option>
-              <option value="administrateur">Administrateur</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Statut du compte</label>
-            <select class="form-control" [(ngModel)]="user.statut">
-              <option value="actif">Actif</option>
-              <option value="inactif">Inactif</option>
-              <option value="suspendu">Suspendu</option>
-            </select>
+          <div class="form-group" style="display:flex;align-items:center;padding-top:28px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" [(ngModel)]="user.actif" style="width:16px;height:16px;accent-color:var(--bmce-navy);">
+              <span>Compte actif</span>
+            </label>
           </div>
         </div>
 
       </div>
       <div class="bmce-card__footer">
-        <button class="btn btn--danger" style="margin-right:auto;">Désactiver le compte</button>
-        <button class="btn btn--ghost" routerLink="/administration/rechercher">Annuler</button>
-        <button class="btn btn--primary">
+        <button type="button" class="btn btn--ghost" routerLink="/administration/rechercher">Annuler</button>
+        <button type="button" class="btn btn--primary" (click)="submit()" [disabled]="saving">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-          Enregistrer
+          {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
         </button>
       </div>
     </div>
 
-    <!-- Sidebar info + activité -->
-    <div class="flex-1" style="display:flex;flex-direction:column;gap:16px;">
-
-      <!-- Carte utilisateur -->
+    <!-- Sidebar info -->
+    <div class="flex-1">
       <div class="bmce-card">
         <div class="bmce-card__body">
           <div style="text-align:center;padding:16px 0 12px;">
@@ -94,36 +81,12 @@
               {{ initiales }}
             </div>
             <div style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--bmce-navy);">{{ user.prenom }} {{ user.nom }}</div>
-            <div style="font-size:12px;color:var(--gray-400);">{{ user.poste }}</div>
+            <div style="font-size:12px;color:var(--gray-400);">{{ user.login }}</div>
           </div>
         </div>
       </div>
-
-      <!-- Journal activité -->
-      <div class="bmce-card">
-        <div class="bmce-card__header">
-          <div class="bmce-card__title">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--bmce-navy)" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/>
-            </svg>
-            Activité récente
-          </div>
-        </div>
-        <div class="bmce-card__body">
-          <div class="timeline">
-            <div *ngFor="let a of activite" class="tl-item">
-              <div class="tl-dot tl-dot--done">
-                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--success)" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-              </div>
-              <div class="tl-content">
-                <div class="tl-title">{{ a.action }}</div>
-                <div class="tl-date">{{ a.date }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
+<p *ngIf="loading" style="padding:24px;color:var(--gray-500);">Chargement…</p>
+<p class="profile-message error" *ngIf="!loading && error && !user.login">{{ error }}</p>

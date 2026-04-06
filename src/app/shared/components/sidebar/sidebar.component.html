@@ -64,14 +64,26 @@
     </div>
   </nav>
 
-  <!-- Footer utilisateur + bloc en bas -->
+  <!-- Footer utilisateur + menu profil / déconnexion -->
   <div class="sb-footer">
-    <div class="sb-footer__user">
-      <div class="sb-footer__avatar">AM</div>
-      <div>
-        <div class="sb-footer__name">Admin BMCE</div>
-        <div class="sb-footer__role">Super Administrateur</div>
+    <div class="sb-footer__user" (click)="toggleProfileMenu()" (keydown.enter)="toggleProfileMenu()" tabindex="0" role="button" aria-expanded="{{profileOpen}}" aria-haspopup="true">
+      <div class="sb-footer__avatar">{{ initials }}</div>
+      <div class="sb-footer__user-text">
+        <div class="sb-footer__name">{{ auth.displayName() }}</div>
+        <div class="sb-footer__role">{{ auth.roleLabel() }}</div>
       </div>
+      <svg class="sb-footer__chevron" [class.sb-footer__chevron--open]="profileOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+    <div class="sb-footer__dropdown" *ngIf="profileOpen">
+      <a routerLink="/profil" class="sb-footer__dropdown-item" (click)="profileOpen = false">
+        <span>Mon profil</span>
+      </a>
+      <div class="sb-footer__dropdown-sep" aria-hidden="true"></div>
+      <button type="button" class="sb-footer__dropdown-item sb-footer__dropdown-item--logout" (click)="logout()">
+        Déconnexion
+      </button>
     </div>
     <div class="sb-footer__brand">Bank of Africa · BMCE Group</div>
   </div>

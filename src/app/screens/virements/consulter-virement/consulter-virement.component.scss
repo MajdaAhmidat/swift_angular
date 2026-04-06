@@ -1,1 +1,145 @@
-// Styles spécifiques — voir styles.scss pour le design system BMCE
+.state {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.state--loading {
+  color: var(--gray-500);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.state--error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.vir-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+.vir-header__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vir-header__ref {
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bmce-navy);
+}
+
+.vir-header__meta {
+  color: var(--gray-500);
+  font-size: 12px;
+}
+
+.vir-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vir-header__status {
+  font-size: 12px;
+  padding: 5px 12px;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kpi-card {
+  border: 1px solid var(--gray-200);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.kpi-card__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--gray-400);
+  margin-bottom: 4px;
+}
+
+.kpi-card__value {
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bmce-navy);
+}
+
+.card-raw {
+  margin-top: 12px;
+}
+
+.raw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.raw-item {
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: #fff;
+}
+
+.raw-item__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--gray-400);
+  margin-bottom: 3px;
+}
+
+.raw-item__value {
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--gray-700);
+  word-break: break-word;
+}
+
+@media (max-width: 1024px) {
+  .vir-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vir-header__right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .kpi-row,
+  .raw-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-row,
+  .raw-grid {
+    grid-template-columns: 1fr;
+  }
+}

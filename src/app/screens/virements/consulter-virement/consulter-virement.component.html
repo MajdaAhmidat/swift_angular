@@ -6,9 +6,16 @@
 </app-topbar>
 
 <div class="page-body stagger">
+  <div *ngIf="loading" class="state state--loading">
+    Chargement du virement...
+  </div>
+
+  <div *ngIf="error" class="state state--error">
+    {{ error }}
+  </div>
 
   <!-- ── HEADER VIREMENT ── -->
-  <div class="vir-header">
+  <div class="vir-header" *ngIf="!loading && !error">
     <div class="vir-header__left">
       <button class="btn btn--ghost btn--sm" routerLink="/virements/recherche">← Retour</button>
       <div>
@@ -19,25 +26,25 @@
       </div>
     </div>
     <div class="vir-header__right">
-      <span class="badge" [ngClass]="badgeClass" style="font-size:12px;padding:5px 12px;">{{ badgeLabel }}</span>
-      <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', virementId]">Voir message MX</button>
+      <span class="badge vir-header__status" [ngClass]="badgeClass">{{ badgeLabel }}</span>
+      <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', virementId]" [queryParams]="{ direction: direction }">Voir message MX</button>
       <button class="btn btn--primary btn--sm">Télécharger PDF</button>
     </div>
   </div>
 
   <!-- ── ALERTE SUCCÈS ── -->
-  <div class="bmce-alert bmce-alert--success">
+  <div class="bmce-alert bmce-alert--success" *ngIf="!loading && !error && virement.statut === 'rapproche'">
     <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path d="M5 13l4 4L19 7"/>
     </svg>
     <div>
       <div class="bmce-alert__title">Virement rapproché avec succès</div>
-      <div class="bmce-alert__msg">Ce virement a été rapproché automatiquement le 11/03/2026 à 10h12 via {{ virement.sop }}.</div>
+      <div class="bmce-alert__msg">Ce virement a été rapproché automatiquement via {{ virement.sop }}.</div>
     </div>
   </div>
 
   <!-- ── CONTENU ── -->
-  <div class="gap-row">
+  <div class="gap-row" *ngIf="!loading && !error">
 
     <!-- Informations générales -->
     <div class="bmce-card flex-2">
@@ -51,6 +58,20 @@
         </div>
       </div>
       <div class="bmce-card__body">
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-card__label">Montant</div>
+            <div class="kpi-card__value">{{ virement.montant | number:'1.2-2' }} {{ virement.devise }}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Direction</div>
+            <div class="kpi-card__value">{{ virement.direction === 'emis' ? 'EMIS' : 'RECU' }}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Date valeur</div>
+            <div class="kpi-card__value">{{ virement.dateValeur }}</div>
+          </div>
+        </div>
 
         <div class="section-divider">Émetteur</div>
         <div class="detail-grid">
@@ -87,18 +108,8 @@
         <div class="section-divider">Détails du virement</div>
         <div class="detail-grid">
           <div class="detail-item">
-            <div class="detail-item__label">Montant</div>
-            <div class="detail-item__value detail-item__value--navy" style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;">
-              {{ virement.montant | number:'1.2-2' }} {{ virement.devise }}
-            </div>
-          </div>
-          <div class="detail-item">
             <div class="detail-item__label">Devise</div>
             <div class="detail-item__value">{{ virement.devise }} — Dirham Marocain</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Date valeur</div>
-            <div class="detail-item__value">{{ virement.dateValeur }}</div>
           </div>
           <div class="detail-item">
             <div class="detail-item__label">Référence</div>
@@ -109,8 +120,16 @@
             <div class="detail-item__value"><span class="badge badge--navy">{{ virement.sop }}</span></div>
           </div>
           <div class="detail-item">
+            <div class="detail-item__label">Compte donneur d'ordre</div>
+            <div class="detail-item__value detail-item__value--mono">{{ virement.compteDonneurOrdre || '-' }}</div>
+          </div>
+          <div class="detail-item">
             <div class="detail-item__label">Motif</div>
-            <div class="detail-item__value">{{ virement.motif }}</div>
+            <div class="detail-item__value">{{ virement.motif || '-' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item__label">Dernière mise à jour</div>
+            <div class="detail-item__value">{{ virement.updatedAt || '-' }}</div>
           </div>
         </div>
 
@@ -124,7 +143,7 @@
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--bmce-navy)" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/>
           </svg>
-          Historique du traitement
+          Suivi du traitement
         </div>
       </div>
       <div class="bmce-card__body">
@@ -147,5 +166,19 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="bmce-card card-raw" *ngIf="!loading && !error">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">Données techniques du virement</div>
+    </div>
+    <div class="bmce-card__body">
+      <div class="raw-grid">
+        <div class="raw-item" *ngFor="let field of rawFields">
+          <div class="raw-item__label">{{ field.key }}</div>
+          <div class="raw-item__value">{{ field.value }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

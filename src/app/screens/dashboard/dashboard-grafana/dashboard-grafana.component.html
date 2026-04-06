@@ -1,32 +1,106 @@
 <app-topbar
-  pageTitle="Accueil"
-  breadcrumb="Accueil › Dashboard"
-  secondaryLabel="Ouvrir Grafana dans un nouvel onglet">
+  pageTitle="Centre de Monitoring SWIFT"
+  breadcrumb="Accueil › Supervision des virements">
 </app-topbar>
 
 <div class="page-body grafana-embed">
-  <div class="grafana-embed__toolbar">
-    <a
-      [href]="grafanaUrl()"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="grafana-embed__link">
-      Ouvrir dans Grafana
-    </a>
-    <span class="grafana-embed__refresh">Rafraîchissement auto : {{ refreshLabel }}</span>
+  <section class="filters-card">
+    <div class="filters-card__header">
+      <h2>Filtres de recherche</h2>
+      <p>Sélectionnez un SOP puis affinez l'analyse par type de message, PACS et période.</p>
+    </div>
+    <div class="grafana-embed__filters">
+      <div class="filters-row">
+        <div class="filter-field filter-field--wide">
+          <label for="sop-select">SOP</label>
+          <select
+            id="sop-select"
+            [(ngModel)]="selectedSopId"
+            (ngModelChange)="onSopChange($event)"
+            class="filter-input">
+            <option value="">Choisir un SOP</option>
+            <option *ngFor="let sop of sops" [value]="sop.id">
+              {{ sop.libelleSop }} (ID: {{ sop.id }})
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="message-type-select">Type de message</label>
+          <select
+            id="message-type-select"
+            [(ngModel)]="selectedMessageType"
+            (ngModelChange)="onMessageTypeChange($event)"
+            class="filter-input">
+            <option *ngFor="let option of messageTypeOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="pacs-type-select">Type PACS</label>
+          <select
+            id="pacs-type-select"
+            [(ngModel)]="selectedPacsType"
+            (ngModelChange)="onPacsTypeChange($event)"
+            class="filter-input">
+            <option *ngFor="let option of pacsOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-row filters-row--dates">
+        <div class="filter-field">
+          <label for="date-from-input">Date début</label>
+          <input
+            id="date-from-input"
+            type="date"
+            [(ngModel)]="selectedDateFrom"
+            (ngModelChange)="onDateRangeChange()"
+            class="filter-input filter-input--date" />
+        </div>
+
+        <div class="filter-field">
+          <label for="date-to-input">Date fin</label>
+          <input
+            id="date-to-input"
+            type="date"
+            [(ngModel)]="selectedDateTo"
+            (ngModelChange)="onDateRangeChange()"
+            class="filter-input filter-input--date" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="feedback feedback--loading" *ngIf="loading">
+    Chargement des SOP en cours...
+  </div>
+  <div class="feedback feedback--error" *ngIf="error">
+    {{ error }}
   </div>
 
-  <!-- Message d'aide si "LOCALHOST EST BLOQUÉ" -->
-  <div class="grafana-embed__help">
-    <strong>Le dashboard ne s'affiche pas ?</strong> Grafana doit autoriser l’affichage dans une iframe :
-    dans le dossier <code>conf</code> de Grafana, créez <code>custom.ini</code> avec <code>[security]</code> et <code>allow_embedding = true</code>, puis redémarrez Grafana.
-    <a [href]="grafanaUrl()" target="_blank" rel="noopener noreferrer" class="grafana-embed__help-link">Ouvrir Grafana dans un nouvel onglet →</a>
+  <!-- Affiche plusieurs panels via ngFor -->
+  <div class="grafana-container" *ngIf="selectedSopId">
+    <div class="grafana-panel" *ngFor="let p of panels">
+      <iframe
+        class="grafana-embed__iframe"
+        [src]="getPanelUrl(p.id) | safeResourceUrl"
+        title="Graphes SOP"
+        frameborder="0"
+        loading="lazy">
+      </iframe>
+      <div class="panel-top-mask" aria-hidden="true"></div>
+    </div>
   </div>
 
-  <iframe
-    class="grafana-embed__iframe"
-    [src]="grafanaUrl() | safeResourceUrl"
-    title="Accueil - Dashboard"
-    loading="eager">
-  </iframe>
+  <div class="select-placeholder" *ngIf="!selectedSopId">
+    <div class="placeholder-content">
+      <i class="info-icon">ℹ️</i>
+      <p>Aucun SOP sélectionné. Choisissez un SOP pour afficher les indicateurs de supervision.</p>
+    </div>
+  </div>
 </div>

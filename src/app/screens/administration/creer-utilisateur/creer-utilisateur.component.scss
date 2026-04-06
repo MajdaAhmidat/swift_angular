@@ -1,1 +1,126 @@
-// Styles spécifiques — voir styles.scss pour le design system BMCE
+.section-grid {
+  margin-bottom: 14px;
+}
+
+.account-status {
+  display: flex;
+  align-items: center;
+  padding-top: 28px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.permission-check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--bmce-navy);
+}
+
+.permission-card {
+  margin-top: 10px;
+}
+
+.permission-intro {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 10px;
+}
+
+.permission-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.permission-table th,
+.permission-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 12px;
+}
+
+.permission-table th {
+  text-align: left;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+.module-cell {
+  font-weight: 600;
+  color: var(--bmce-navy);
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.preview-header {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+
+.avatar-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bmce-navy), var(--bmce-teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  color: #fff;
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.preview-name {
+  font-family: "Sora", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bmce-navy);
+}
+
+.preview-role {
+  margin-top: 10px;
+}
+
+.preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  gap: 16px;
+}
+
+.preview-label {
+  color: var(--gray-400);
+}
+
+.preview-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.preview-value--accent {
+  color: var(--bmce-navy);
+}
+
+.preview-value--status {
+  font-weight: 600;
+}
+
+@media (max-width: 992px) {
+  .account-status {
+    padding-top: 8px;
+  }
+}

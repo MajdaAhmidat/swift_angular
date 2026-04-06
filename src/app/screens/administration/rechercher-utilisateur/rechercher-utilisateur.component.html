@@ -56,6 +56,9 @@
       <div class="bmce-card__title">{{ usersFiltres.length }} utilisateur(s)</div>
     </div>
     <div class="bmce-card__body" style="padding:12px;">
+      <p class="profile-message error" *ngIf="error">{{ error }}</p>
+      <p class="profile-message success" *ngIf="success">{{ success }}</p>
+      <p *ngIf="loading" style="padding:20px;color:var(--gray-500);">Chargement…</p>
       <div *ngFor="let u of usersFiltres; let i = index"
         style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--gray-50);border-radius:9px;border:1px solid var(--gray-100);margin-bottom:8px;transition:all .15s;cursor:pointer;"
         (mouseover)="$event.target && ($any($event.target).style.background='var(--bmce-navy-light)')"
@@ -85,11 +88,18 @@
         <div style="display:flex;gap:6px;">
           <button class="btn btn--secondary btn--sm" [routerLink]="['/administration/modifier', u.id]">Modifier</button>
           <button class="btn btn--ghost btn--sm" [routerLink]="['/administration/droits', u.id]">Droits</button>
+          <button
+            class="btn btn--ghost btn--sm"
+            style="color:#dc2626;border-color:#fecaca;"
+            (click)="supprimerUtilisateur(u)"
+            [disabled]="deletingId === u.id">
+            {{ deletingId === u.id ? 'Suppression…' : 'Supprimer' }}
+          </button>
         </div>
       </div>
 
       <!-- Empty state -->
-      <div *ngIf="usersFiltres.length === 0" style="padding:40px;text-align:center;">
+      <div *ngIf="!loading && usersFiltres.length === 0" style="padding:40px;text-align:center;">
         <div style="font-size:14px;color:var(--gray-400);">Aucun utilisateur trouvé</div>
       </div>
     </div>

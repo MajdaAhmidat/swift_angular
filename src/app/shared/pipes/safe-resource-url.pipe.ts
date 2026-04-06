@@ -3,7 +3,6 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 /**
  * Permet d’utiliser une URL dans [src] d’une iframe (ex. dashboard Grafana)
- * en contournant la sanitization Angular.
  */
 @Pipe({ name: 'safeResourceUrl', standalone: true })
 export class SafeResourceUrlPipe implements PipeTransform {

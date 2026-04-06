@@ -1,65 +1,212 @@
 .grafana-embed {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--topbar-h, 72px) - 2rem);
-  min-height: 400px;
-  padding: 0;
+  min-height: calc(100vh - 120px);
+  padding: 1.5rem;
+  gap: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  background: #f8fafc;
 
-  &__toolbar {
+  .filters-card {
+    background: #ffffff;
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    padding: 1rem 1.25rem 1.25rem;
+
+    &__header {
+      margin-bottom: 1rem;
+
+      h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      p {
+        margin: 0.35rem 0 0;
+        font-size: 0.86rem;
+        color: #64748b;
+      }
+    }
+  }
+
+  &__filters {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.5rem 0 0.75rem;
-    flex-shrink: 0;
-  }
+    flex-direction: column;
+    gap: 0.9rem;
 
-  &__link {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--navy-600, #245090);
-    &:hover {
-      color: var(--navy-700, #1B3A6B);
-      text-decoration: underline;
+    .filters-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem 1rem;
+    }
+
+    .filters-row--dates {
+      grid-template-columns: repeat(2, minmax(230px, 280px));
+      justify-content: center;
+    }
+
+    .filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+
+    .filter-field--wide {
+      grid-column: span 2;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #334155;
+    }
+
+    .filter-input {
+      height: 40px;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid #c7d2e5;
+      border-radius: 8px;
+      background-color: #ffffff;
+      color: #0f172a;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #245090;
+        box-shadow: 0 0 0 3px rgba(36, 80, 144, 0.12);
+      }
+    }
+
+    .filter-input--date {
+      min-width: 0;
     }
   }
 
-  &__refresh {
-    font-size: 0.75rem;
-    color: var(--gray-500, #626D80);
+  .feedback {
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.88rem;
+    border: 1px solid transparent;
   }
 
-  &__help {
-    font-size: 0.75rem;
-    color: var(--gray-600, #3D4758);
-    background: var(--info-bg, #E6F5F9);
-    border: 1px solid var(--info-brd, #99D8E8);
-    border-radius: var(--r-sm, 4px);
-    padding: 0.5rem 0.75rem;
-    margin-bottom: 0.75rem;
-    flex-shrink: 0;
-
-    code {
-      background: rgba(0,0,0,.06);
-      padding: 0.1em 0.35em;
-      border-radius: 3px;
-      font-size: 0.7rem;
-    }
+  .feedback--loading {
+    color: #1d4ed8;
+    background: #eff6ff;
+    border-color: #bfdbfe;
   }
 
-  &__help-link {
-    display: inline-block;
-    margin-top: 0.35rem;
-    font-weight: 600;
-    color: var(--navy-600, #245090);
-    &:hover { text-decoration: underline; }
+  .feedback--error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+
+  .grafana-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .grafana-panel {
+    position: relative;
+    min-width: 0;
+  }
+
+  .panel-top-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    background: transparent;
+    z-index: 3;
+    pointer-events: auto;
+  }
+
+  .grafana-panel:nth-child(1) {
+    grid-column: 1 / -1;
   }
 
   &__iframe {
-    flex: 1;
     width: 100%;
-    border: none;
-    border-radius: var(--r, 6px);
-    box-shadow: var(--sh-card, 0 1px 3px rgba(0,0,0,.07));
+    height: 400px; // augmenter la hauteur des diagrammes
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
     background: #fff;
+    display: block;
+  }
+
+  @media (max-width: 992px) {
+    .filters-card {
+      padding: 1rem;
+    }
+
+    &__filters {
+      .filters-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filters-row--dates {
+        grid-template-columns: repeat(2, minmax(200px, 260px));
+      }
+    }
+
+    .filter-field--wide {
+      grid-column: span 2;
+    }
+
+    .grafana-container {
+      grid-template-columns: 1fr;
+    }
+
+    .grafana-panel:nth-child(1) {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    padding: 1rem;
+
+    &__filters {
+      .filters-row,
+      .filters-row--dates {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filter-field--wide {
+      grid-column: auto;
+    }
+  }
+
+  .select-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    color: #64748b;
+    text-align: center;
+
+    .placeholder-content {
+      max-width: 400px;
+      .info-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
+    }
   }
 }

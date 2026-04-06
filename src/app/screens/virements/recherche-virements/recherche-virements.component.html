@@ -18,8 +18,8 @@
           </svg>
         </div>
       </div>
-      <div class="stat-card__value">4 821</div>
-      <div class="stat-card__trend stat-card__trend--up">↑ +12% ce mois</div>
+      <div class="stat-card__value">{{ virements.length | number:'1.0-0' }}</div>
+      <div class="stat-card__trend stat-card__trend--up">Chargés depuis la base</div>
     </div>
 
     <div class="stat-card stat-card--green">
@@ -31,8 +31,15 @@
           </svg>
         </div>
       </div>
-      <div class="stat-card__value" style="color:var(--success)">4 797</div>
-      <div class="stat-card__trend stat-card__trend--up">Taux 99.5%</div>
+      <div class="stat-card__value" style="color:var(--success)">{{ countRapproches | number:'1.0-0' }}</div>
+      <div class="stat-card__trend stat-card__trend--up">
+        Taux
+        {{
+          virements.length
+            ? ((countRapproches * 100) / virements.length | number:'1.0-1')
+            : 0
+        }}%
+      </div>
     </div>
 
     <div class="stat-card stat-card--red">
@@ -44,8 +51,8 @@
           </svg>
         </div>
       </div>
-      <div class="stat-card__value" style="color:var(--danger)">24</div>
-      <div class="stat-card__trend stat-card__trend--down">↓ Action requise</div>
+      <div class="stat-card__value" style="color:var(--danger)">{{ countNonRapproches | number:'1.0-0' }}</div>
+      <div class="stat-card__trend stat-card__trend--down">Action requise</div>
     </div>
 
     <div class="stat-card stat-card--teal">
@@ -57,8 +64,8 @@
           </svg>
         </div>
       </div>
-      <div class="stat-card__value" style="color:var(--teal-600)">382M</div>
-      <div class="stat-card__trend">MAD ce mois</div>
+      <div class="stat-card__value" style="color:var(--teal-600)">{{ totalMontant | number:'1.0-0' }}</div>
+      <div class="stat-card__trend">MAD</div>
     </div>
   </div>
 
@@ -158,7 +165,7 @@
     </div>
     <div class="bmce-card__footer">
       <button class="btn btn--ghost btn--sm" (click)="resetFiltre()">Réinitialiser</button>
-      <button class="btn btn--primary">
+      <button class="btn btn--primary" [disabled]="loading">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
         </svg>
@@ -175,7 +182,7 @@
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
           <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
         </svg>
-        Tous <span class="dir-btn__count">4 821</span>
+        Tous <span class="dir-btn__count">{{ virements.length | number:'1.0-0' }}</span>
       </button>
       <button class="dir-btn" [class.dir-btn--active]="directionActive()==='emis'" (click)="setDirection('emis')">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
@@ -238,7 +245,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let v of virementsFiltres" [routerLink]="['/virements/consulter', v.id]">
+        <tr *ngFor="let v of virementsFiltres" [routerLink]="['/virements/consulter', v.id]" [queryParams]="{ direction: v.direction }">
 
           <td>
             <div class="dir-icon" [class.dir-icon--emis]="v.direction==='emis'" [class.dir-icon--recus]="v.direction==='recus'">
@@ -275,15 +282,24 @@
 
           <td (click)="$event.stopPropagation()">
             <div style="display:flex;gap:4px;">
-              <button class="btn btn--secondary btn--sm" [routerLink]="['/virements/consulter', v.id]">Consulter</button>
-              <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', v.id]">MX</button>
+              <button class="btn btn--secondary btn--sm" [routerLink]="['/virements/consulter', v.id]" [queryParams]="{ direction: v.direction }">Consulter</button>
+              <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', v.id]" [queryParams]="{ direction: v.direction }">MX</button>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div *ngIf="virementsFiltres.length === 0"
+    <div *ngIf="loading" style="padding:28px;text-align:center;color:var(--gray-400);font-weight:600;">
+      Chargement des virements...
+    </div>
+
+    <div *ngIf="!loading && error"
+      style="padding:24px;text-align:center;color:var(--danger);font-weight:600;">
+      {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error && virementsFiltres.length === 0"
       style="padding:48px;text-align:center;color:var(--gray-400);">
       <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="var(--gray-300)" stroke-width="1.5"
         style="display:block;margin:0 auto 10px;">
@@ -294,7 +310,7 @@
     </div>
 
     <div class="pagination">
-      <div class="pagination__info">1–{{ virementsFiltres.length }} sur 4 821 résultats</div>
+      <div class="pagination__info">1–{{ virementsFiltres.length }} sur {{ virements.length }} résultats</div>
       <div class="pagination__buttons">
         <div class="pagination__btn">‹</div>
         <div class="pagination__btn pagination__btn--active">1</div>

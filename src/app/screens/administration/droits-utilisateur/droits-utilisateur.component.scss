@@ -1,1 +1,86 @@
-// Styles spécifiques — voir styles.scss pour le design system BMCE
+.section-card {
+  margin-bottom: 16px;
+}
+
+.role-grid {
+  margin-bottom: 12px;
+}
+
+.account-status {
+  display: flex;
+  align-items: center;
+  padding-top: 28px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.permission-check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--bmce-navy);
+}
+
+.user-meta {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.hint-label {
+  font-size: 11px;
+  color: var(--gray-400);
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-note {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 8px;
+}
+
+.module-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.table-actions {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.loading-text {
+  padding: 24px;
+  color: var(--gray-500);
+}
+
+@media (max-width: 768px) {
+  .account-status {
+    padding-top: 6px;
+  }
+
+  .table-actions {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .table-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
