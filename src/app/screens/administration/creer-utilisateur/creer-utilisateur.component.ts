@@ -104,6 +104,17 @@ export class CreerUtilisateurComponent implements OnInit {
     this.onRoleSelectionChanged(this.user.roleId);
   }
 
+  onActifChange(value: boolean): void {
+    this.user.actif = !!value;
+    this.user.statut = this.user.actif ? 'actif' : 'inactif';
+  }
+
+  onStatutChange(value: string): void {
+    const normalized = (value || '').toLowerCase();
+    this.user.statut = normalized === 'actif' ? 'actif' : 'inactif';
+    this.user.actif = this.user.statut === 'actif';
+  }
+
   get selectedRoleCode(): string {
     const selected = this.roles.find(r => r.idRole === this.user.roleId);
     return (selected?.code || '').toLowerCase();

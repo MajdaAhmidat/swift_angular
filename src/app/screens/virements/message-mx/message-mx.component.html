@@ -1,44 +1,50 @@
-<app-topbar
-  pageTitle="Messages MX ISO 20022"
-  breadcrumb="Accueil › Virements › Messages MX"
-  secondaryLabel="XML brut">
-</app-topbar>
-
 <div class="page-body stagger">
+  <div class="mx-menu-fixed">
+    <app-topbar pageTitle="Messages MX ISO 20022" breadcrumb="Accueil › Virements › Messages MX"></app-topbar>
 
-  <!-- Header virement -->
-  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-    <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/consulter', virementId]" [queryParams]="{ direction: direction }">← Retour au virement</button>
-    <div>
-      <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--bmce-navy);">Virement #{{ virementId }}</div>
-      <div style="font-size:11px;color:var(--gray-400);">Message MX archive depuis la base de donnees</div>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:8px;">
-      <span class="badge badge--green" *ngIf="xmlContent">Message trouve</span>
-      <span class="badge badge--red" *ngIf="!xmlContent && !loading">Aucun message</span>
-      <span class="badge badge--navy" *ngIf="sourceLabel">Source {{ sourceLabel }}</span>
+    <div class="mx-top-row">
+      <button class="btn btn--back vir-back-btn" [routerLink]="['/virements/consulter', virementId]" [queryParams]="{ direction: direction }">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        Retour
+      </button>
+      <div class="mx-header-actions">
+        <span class="badge badge--navy">Virement #{{ virementId }}</span>
+        <span class="badge badge--green">{{ direction === 'recus' ? 'RECU' : 'EMIS' }}</span>
+      </div>
     </div>
   </div>
 
-  <div class="bmce-card">
-    <div class="bmce-card__body">
-      <div *ngIf="loading" style="padding:16px 0;color:var(--gray-400);font-weight:600;">
-        Chargement du message MX...
-      </div>
+  <div class="bmce-card mx-content-card">
+    <div class="bmce-card__body mx-content-card__body">
+      <div *ngIf="loading" class="mx-feedback">Chargement du message...</div>
+      <div *ngIf="error" class="mx-feedback mx-feedback--error">{{ error }}</div>
 
-      <div *ngIf="error" style="padding:12px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;border-radius:8px;margin-bottom:12px;">
-        {{ error }}
-      </div>
-
-      <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;" *ngIf="xmlContent">
-        <span style="font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;">Contenu XML</span>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn--ghost btn--sm" (click)="copyXml()">Copier</button>
+      <div class="mx-meta" *ngIf="!loading && !error">
+        <div class="mx-meta__row">
+          <span class="mx-meta__label">Nom du fichier</span>
+          <span class="mx-meta__value">{{ fileName || '—' }}</span>
+        </div>
+        <div class="mx-meta__row">
+          <span class="mx-meta__label">Path</span>
+          <span class="mx-meta__value mono" [title]="filePath">{{ filePath || '—' }}</span>
         </div>
       </div>
 
-      <pre class="mx-box" *ngIf="xmlContent">{{ xmlContent }}</pre>
+      <div class="mx-toolbar" *ngIf="xmlContent">
+        <span class="mx-toolbar__title">Contenu XML</span>
+        <div class="mx-toolbar__actions">
+          <button class="btn btn--sm mx-btn mx-btn--primary" (click)="copyXml()" [disabled]="!xmlContent">
+            <span>{{ copySuccess ? 'Copié' : 'Copier' }}</span>
+          </button>
+          <button class="btn btn--sm mx-btn mx-btn--primary" (click)="downloadAsText()" [disabled]="!xmlContent">
+            <span>Télécharger TXT</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mx-xml-scroll" *ngIf="xmlContent">
+        <pre class="mx-box">{{ xmlContent }}</pre>
+      </div>
     </div>
   </div>
-
 </div>

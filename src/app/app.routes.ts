@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './shared/guards/auth.guard';
+import { permissionGuard } from './shared/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -31,31 +32,48 @@ export const routes: Routes = [
     children: [
       {
         path: 'recherche',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'virements', action: 'lire' } },
         loadComponent: () =>
           import('./screens/virements/recherche-virements/recherche-virements.component')
             .then(m => m.RechercheVirementsComponent),
         title: 'Recherche des virements — BMCE'
       },
       {
-        path: 'consulter/:id',
+        path: 'consulter',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'virements', action: 'lire' } },
         loadComponent: () =>
           import('./screens/virements/consulter-virement/consulter-virement.component')
             .then(m => m.ConsulterVirementComponent),
         title: 'Consulter un virement — BMCE'
       },
       {
-        path: 'message-mx/:id',
+        path: 'consulter/:id',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'virements', action: 'lire' } },
+        loadComponent: () =>
+          import('./screens/virements/consulter-virement/consulter-virement.component')
+            .then(m => m.ConsulterVirementComponent),
+        title: 'Consulter un virement — BMCE'
+      },
+      {
+        path: 'message-mx',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'messages_mx', action: 'lire' } },
         loadComponent: () =>
           import('./screens/virements/message-mx/message-mx.component')
             .then(m => m.MessageMxComponent),
         title: 'Message MX — BMCE'
       },
       {
-        path: 'non-rapproches',
+        path: 'message-mx/:id',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'messages_mx', action: 'lire' } },
         loadComponent: () =>
-          import('./screens/virements/non-rapproches/non-rapproches.component')
-            .then(m => m.NonRaprochesComponent),
-        title: 'Non rapprochés — BMCE'
+          import('./screens/virements/message-mx/message-mx.component')
+            .then(m => m.MessageMxComponent),
+        title: 'Message MX — BMCE'
       }
     ]
   },
@@ -64,17 +82,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'non-rapproches',
-        redirectTo: 'grafana',
-        pathMatch: 'full'
-      },
-      {
-        path: 'rapproches',
-        redirectTo: 'grafana',
-        pathMatch: 'full'
-      },
-      {
         path: 'grafana',
+        canActivate: [permissionGuard],
+        data: { permission: { module: 'tableaux_bord', action: 'lire' } },
         loadComponent: () =>
           import('./screens/dashboard/dashboard-grafana/dashboard-grafana.component')
             .then(m => m.DashboardGrafanaComponent),

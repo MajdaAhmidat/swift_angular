@@ -4,55 +4,30 @@
 </app-topbar>
 
 <div class="page-body grafana-embed">
-  <section class="filters-card">
-    <div class="filters-card__header">
-      <h2>Filtres de recherche</h2>
-      <p>Sélectionnez un SOP puis affinez l'analyse par type de message, PACS et période.</p>
+  <section class="bmce-card dashboard-filter-card">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        Filtres de supervision
+      </div>
     </div>
-    <div class="grafana-embed__filters">
-      <div class="filters-row">
-        <div class="filter-field filter-field--wide">
+    <div class="bmce-card__body grafana-embed__filters">
+      <div class="filters-row filters-row--main">
+        <div class="filter-field">
           <label for="sop-select">SOP</label>
           <select
             id="sop-select"
             [(ngModel)]="selectedSopId"
             (ngModelChange)="onSopChange($event)"
             class="filter-input">
-            <option value="">Choisir un SOP</option>
             <option *ngFor="let sop of sops" [value]="sop.id">
               {{ sop.libelleSop }} (ID: {{ sop.id }})
             </option>
           </select>
         </div>
-
-        <div class="filter-field">
-          <label for="message-type-select">Type de message</label>
-          <select
-            id="message-type-select"
-            [(ngModel)]="selectedMessageType"
-            (ngModelChange)="onMessageTypeChange($event)"
-            class="filter-input">
-            <option *ngFor="let option of messageTypeOptions" [value]="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="filter-field">
-          <label for="pacs-type-select">Type PACS</label>
-          <select
-            id="pacs-type-select"
-            [(ngModel)]="selectedPacsType"
-            (ngModelChange)="onPacsTypeChange($event)"
-            class="filter-input">
-            <option *ngFor="let option of pacsOptions" [value]="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <div class="filters-row filters-row--dates">
         <div class="filter-field">
           <label for="date-from-input">Date début</label>
           <input
@@ -60,7 +35,7 @@
             type="date"
             [(ngModel)]="selectedDateFrom"
             (ngModelChange)="onDateRangeChange()"
-            class="filter-input filter-input--date" />
+            class="filter-input filter-input--date filter-input--date-pro" />
         </div>
 
         <div class="filter-field">
@@ -70,7 +45,80 @@
             type="date"
             [(ngModel)]="selectedDateTo"
             (ngModelChange)="onDateRangeChange()"
-            class="filter-input filter-input--date" />
+            class="filter-input filter-input--date filter-input--date-pro" />
+        </div>
+      </div>
+
+      <div class="section-divider">Filtres rapides</div>
+      <div class="pacs-switch-row">
+        <div class="dir-toggle pacs-switch message-switch">
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedMessageType === '__all'"
+            (click)="onMessageTypeChange('__all')">
+            <span class="pacs-switch__icon">≡</span>
+            Tous messages
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedMessageType === 'Emis ACK'"
+            (click)="onMessageTypeChange('Emis ACK')">
+            <span class="pacs-switch__icon">✓</span>
+            EMIS ACK
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedMessageType === 'Emis NACK'"
+            (click)="onMessageTypeChange('Emis NACK')">
+            <span class="pacs-switch__icon">!</span>
+            EMIS NACK
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedMessageType === 'Recu Rapproche'"
+            (click)="onMessageTypeChange('Recu Rapproche')">
+            <span class="pacs-switch__icon">↓</span>
+            RECU rapproché
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedMessageType === 'Recu Non rapproche'"
+            (click)="onMessageTypeChange('Recu Non rapproche')">
+            <span class="pacs-switch__icon">!</span>
+            RECU non rapproché
+          </button>
+        </div>
+        <div class="toggle-divider"></div>
+        <div class="dir-toggle pacs-switch pacs-switch--right">
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedPacsType === '__all'"
+            (click)="onPacsTypeChange('__all')">
+            <span class="pacs-switch__icon">≡</span>
+            Tous
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedPacsType === 'pacs.008.001.08'"
+            (click)="onPacsTypeChange('pacs.008.001.08')">
+            <span class="pacs-switch__icon">→</span>
+            PACS.008
+          </button>
+          <button
+            type="button"
+            class="dir-btn"
+            [class.dir-btn--active]="selectedPacsType === 'pacs.009.001.08'"
+            (click)="onPacsTypeChange('pacs.009.001.08')">
+            <span class="pacs-switch__icon">←</span>
+            PACS.009
+          </button>
         </div>
       </div>
     </div>
@@ -99,7 +147,7 @@
 
   <div class="select-placeholder" *ngIf="!selectedSopId">
     <div class="placeholder-content">
-      <i class="info-icon">ℹ️</i>
+      <i class="info-icon">i</i>
       <p>Aucun SOP sélectionné. Choisissez un SOP pour afficher les indicateurs de supervision.</p>
     </div>
   </div>

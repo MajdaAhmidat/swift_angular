@@ -1,7 +1,34 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { AuthService } from './auth.service';
+
+/** Ligne MESSAGE_EMIS (liste / clé pour XML). */
+export interface MessageEmisListApi {
+  idMsgEmis: number;
+  idVrtEmisVirementEmis: number;
+  idSopVirementEmis: number;
+  idStatutStatutVirementEmis: number;
+  idAdresseAdresseVirementEmis: number;
+  codeBicBicVirementEmis: number;
+  codeMsgTypeMessageVirementEmis: number;
+  idVrtEmis: number;
+  nom?: string | null;
+  path?: string | null;
+}
+
+/** Ligne MESSAGE_RECU (liste / clé pour XML). */
+export interface MessageRecuListApi {
+  idMsgRecu: number;
+  idVrtRecuVirementRecu: number;
+  idStatutStatutVirementRecu: number;
+  idAdresseAdresseVirementRecu: number;
+  idSopVirementRecu: number;
+  codeBicBicVirementRecu: number;
+  codeMsgTypeMessageVirementRecu: number;
+  nom?: string | null;
+  path?: string | null;
+}
 
 export interface VirementEmisApi {
   idVrtEmis: number;
@@ -96,8 +123,16 @@ export class VirementsService {
     return this.http.get<VirementEmisApi[]>('/api/virements-emis', this.getOptions());
   }
 
+  updateVirementEmis(payload: VirementEmisApi): Observable<VirementEmisApi> {
+    return this.http.put<VirementEmisApi>('/api/virements-emis', payload, this.getOptions());
+  }
+
   getVirementsRecus(): Observable<VirementRecuApi[]> {
     return this.http.get<VirementRecuApi[]>('/api/virements-recu', this.getOptions());
+  }
+
+  updateVirementRecu(payload: VirementRecuApi): Observable<VirementRecuApi> {
+    return this.http.put<VirementRecuApi>('/api/virements-recu', payload, this.getOptions());
   }
 
   getSops(): Observable<SopApi[]> {
@@ -117,15 +152,61 @@ export class VirementsService {
   }
 
   getMessageXmlByVirementEmis(idVrtEmis: number | string): Observable<string> {
-    return this.http.get(`/api/messages-xml/virement-emis/${idVrtEmis}`, {
+    return this.http.get(`/api/messages-emis/virement/${idVrtEmis}/xml`, {
       ...this.getOptions(),
       responseType: 'text'
     });
   }
 
-  getMessageXmlByVirementRecu(idVrtRecu: number | string): Observable<string> {
-    return this.http.get(`/api/messages-xml/virement-recu/${idVrtRecu}`, {
+  getMessagesEmisByVirement(idVrtEmis: number | string): Observable<MessageEmisListApi[]> {
+    return this.http.get<MessageEmisListApi[]>(
+      `/api/messages-emis/by-virement/${idVrtEmis}`,
+      this.getOptions()
+    );
+  }
+
+  getMessageEmisXmlByRow(row: MessageEmisListApi): Observable<string> {
+    const p = new HttpParams()
+      .set('idMsgEmis', row.idMsgEmis)
+      .set('idVrtEmisVirementEmis', row.idVrtEmisVirementEmis)
+      .set('idSopVirementEmis', row.idSopVirementEmis)
+      .set('idStatutStatutVirementEmis', row.idStatutStatutVirementEmis)
+      .set('idAdresseAdresseVirementEmis', row.idAdresseAdresseVirementEmis)
+      .set('codeBicBicVirementEmis', row.codeBicBicVirementEmis)
+      .set('codeMsgTypeMessageVirementEmis', row.codeMsgTypeMessageVirementEmis);
+    return this.http.get('/api/messages-emis/xml', {
       ...this.getOptions(),
+      params: p,
+      responseType: 'text'
+    });
+  }
+
+  getMessageXmlByVirementRecu(idVrtRecu: number | string): Observable<string> {
+    return this.http.get(`/api/messages-recu/virement/${idVrtRecu}/xml`, {
+      ...this.getOptions(),
+      responseType: 'text'
+    });
+  }
+
+  getMessagesRecuByVirement(idVrtRecu: number | string): Observable<MessageRecuListApi[]> {
+    return this.http.get<MessageRecuListApi[]>(
+      `/api/messages-recu/by-virement/${idVrtRecu}`,
+      this.getOptions()
+    );
+  }
+
+  getMessageRecuXmlByRow(row: MessageRecuListApi): Observable<string> {
+    const p = new HttpParams()
+      .set('idMsgRecu', row.idMsgRecu)
+      .set('idVrtRecuVirementRecu', row.idVrtRecuVirementRecu)
+      .set('idStatutStatutVirementRecu', row.idStatutStatutVirementRecu)
+      .set('idAdresseAdresseVirementRecu', row.idAdresseAdresseVirementRecu)
+      .set('idSopVirementRecu', row.idSopVirementRecu)
+      .set('codeBicBicVirementRecu', row.codeBicBicVirementRecu)
+      .set('codeMsgTypeMessageVirementRecu', row.codeMsgTypeMessageVirementRecu);
+    return this.http.get('/api/messages-recu/xml', {
+      ...this.getOptions(),
+      params: p,
       responseType: 'text'
     });
   }

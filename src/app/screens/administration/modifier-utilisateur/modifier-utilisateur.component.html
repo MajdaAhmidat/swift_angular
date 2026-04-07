@@ -1,13 +1,13 @@
 <app-topbar
   pageTitle="Modifier un utilisateur"
   breadcrumb="Accueil › Administration › Modifier"
-  primaryLabel="Enregistrer les modifications">
+  primaryLabel="Enregistrer les modifications"
+  (primaryClick)="submit()">
 </app-topbar>
 
 <div class="page-body stagger" *ngIf="!loading">
   <div class="gap-row">
 
-    <!-- Formulaire modification -->
     <div class="bmce-card flex-2">
       <div class="bmce-card__header">
         <div class="bmce-card__title">
@@ -15,18 +15,15 @@
             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
-          Modifier les informations
+          Modifier utilisateur
         </div>
-        <span class="badge" [ngClass]="user.actif ? 'badge--green' : 'badge--gray'">
-          {{ user.actif ? 'Compte actif' : 'Compte inactif' }}
-        </span>
       </div>
       <div class="bmce-card__body">
 
         <p class="profile-message error" *ngIf="error">{{ error }}</p>
         <p class="profile-message success" *ngIf="messageSuccess">{{ messageSuccess }}</p>
 
-        <div class="section-divider">Identité</div>
+        <div class="section-divider">Informations utilisateur</div>
         <div class="form-grid form-grid--2" style="margin-bottom:14px;">
           <div class="form-group">
             <label class="form-label">Prénom</label>
@@ -44,9 +41,28 @@
             <label class="form-label">Nouveau mot de passe</label>
             <input type="password" class="form-control" placeholder="Laisser vide pour ne pas modifier" [(ngModel)]="user.motdepasse">
           </div>
+          <div class="form-group">
+            <label class="form-label">Téléphone</label>
+            <input type="text" class="form-control" [(ngModel)]="user.telephone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Département</label>
+            <input type="text" class="form-control" [(ngModel)]="user.departement">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Poste</label>
+            <input type="text" class="form-control" [(ngModel)]="user.poste">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-control" [(ngModel)]="user.statut" (ngModelChange)="onStatutChange($event)">
+              <option value="actif">Actif</option>
+              <option value="inactif">Inactif</option>
+            </select>
+          </div>
         </div>
 
-        <div class="section-divider">Rôle & Accès</div>
+        <div class="section-divider">Rôle & accès</div>
         <div class="form-grid form-grid--2" style="margin-bottom:14px;">
           <div class="form-group">
             <label class="form-label">Rôle</label>
@@ -56,7 +72,7 @@
           </div>
           <div class="form-group" style="display:flex;align-items:center;padding-top:28px;">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" [(ngModel)]="user.actif" style="width:16px;height:16px;accent-color:var(--bmce-navy);">
+              <input type="checkbox" [(ngModel)]="user.actif" (ngModelChange)="onActifChange($event)" style="width:16px;height:16px;accent-color:var(--bmce-navy);">
               <span>Compte actif</span>
             </label>
           </div>
@@ -64,26 +80,16 @@
 
       </div>
       <div class="bmce-card__footer">
-        <button type="button" class="btn btn--ghost" routerLink="/administration/rechercher">Annuler</button>
+        <button type="button" class="btn btn--ghost" routerLink="/administration/rechercher">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+          Annuler
+        </button>
         <button type="button" class="btn btn--primary" (click)="submit()" [disabled]="saving">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
           {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
         </button>
-      </div>
-    </div>
-
-    <!-- Sidebar info -->
-    <div class="flex-1">
-      <div class="bmce-card">
-        <div class="bmce-card__body">
-          <div style="text-align:center;padding:16px 0 12px;">
-            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--bmce-navy),var(--bmce-teal));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:white;font-family:'Sora',sans-serif;font-size:18px;font-weight:700;">
-              {{ initiales }}
-            </div>
-            <div style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:var(--bmce-navy);">{{ user.prenom }} {{ user.nom }}</div>
-            <div style="font-size:12px;color:var(--gray-400);">{{ user.login }}</div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

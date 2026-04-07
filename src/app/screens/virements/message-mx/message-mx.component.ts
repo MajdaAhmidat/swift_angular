@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
-import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
-import { VirementsService } from '../../../shared/services/virements.service';
-import { finalize } from 'rxjs/operators';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
+import {
+  MessageEmisListApi,
+  MessageRecuListApi,
+  VirementsService
+} from '../../../shared/services/virements.service';
 
 @Component({
   selector: 'app-message-mx',
@@ -16,86 +20,130 @@ import { combineLatest } from 'rxjs';
 export class MessageMxComponent implements OnInit {
   virementId = '';
   direction: 'emis' | 'recus' = 'emis';
+
   loading = false;
   error = '';
   xmlContent = '';
-  sourceLabel = '';
+  fileName = '';
+  filePath = '';
+  copySuccess = false;
 
   constructor(
     private route: ActivatedRoute,
-    private virementsService: VirementsService
+    private router: Router,
+    private virementsService: VirementsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
-      this.virementId = params.get('id') || '';
+      const id = params.get('id') || '';
+      if (!id) {
+        this.router.navigate(['/virements/recherche'], { replaceUrl: true });
+        return;
+      }
+      this.virementId = id;
       const qpDirection = (query.get('direction') || '').toLowerCase();
       this.direction = qpDirection === 'recus' ? 'recus' : 'emis';
-      this.loadXml();
+      this.loadCorrespondingMessage();
     });
   }
 
   copyXml(): void {
-    if (!this.xmlContent || !navigator?.clipboard) {
-      return;
-    }
-    navigator.clipboard.writeText(this.xmlContent).catch(() => {});
+    if (!this.xmlContent || !navigator?.clipboard) return;
+    navigator.clipboard.writeText(this.xmlContent).then(() => {
+      this.copySuccess = true;
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.copySuccess = false;
+        this.cdr.detectChanges();
+      }, 1200);
+    }).catch(() => {});
   }
 
-  private loadXml(): void {
+  downloadAsText(): void {
+    if (!this.xmlContent) return;
+    const direction = this.direction === 'recus' ? 'recu' : 'emis';
+    const filename = `message-mx-${direction}-${this.virementId || 'unknown'}.txt`;
+    const blob = new Blob([this.xmlContent], { type: 'text/plain;charset=utf-8' });
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  private loadCorrespondingMessage(): void {
     this.loading = true;
     this.error = '';
     this.xmlContent = '';
-    const id = this.virementId;
+    this.fileName = '';
+    this.filePath = '';
+
+    const done = () => {
+      this.loading = false;
+      this.cdr.detectChanges();
+    };
 
     if (this.direction === 'recus') {
-      this.virementsService.getMessageXmlByVirementRecu(id)
-        .pipe(finalize(() => { this.loading = false; }))
+      this.virementsService.getMessagesRecuByVirement(this.virementId)
+        .pipe(finalize(done))
         .subscribe({
-          next: (xml) => {
-            this.xmlContent = xml || '';
-            this.sourceLabel = 'RECU';
-          },
-          error: () => {
-            this.tryFallbackEmis(id);
-          }
+          next: (rows) => this.pickAndLoadRecu(rows || []),
+          error: () => { this.error = 'Aucun message MX reçu trouvé pour ce virement.'; }
         });
       return;
     }
 
-    this.virementsService.getMessageXmlByVirementEmis(id)
-      .pipe(finalize(() => { this.loading = false; }))
+    this.virementsService.getMessagesEmisByVirement(this.virementId)
+      .pipe(finalize(done))
       .subscribe({
-        next: (xml) => {
-          this.xmlContent = xml || '';
-          this.sourceLabel = 'EMIS';
-        },
-        error: () => {
-          this.tryFallbackRecu(id);
-        }
+        next: (rows) => this.pickAndLoadEmis(rows || []),
+        error: () => { this.error = 'Aucun message MX émis trouvé pour ce virement.'; }
       });
   }
 
-  private tryFallbackEmis(id: string): void {
-    this.virementsService.getMessageXmlByVirementEmis(id).subscribe({
+  private pickAndLoadEmis(rows: MessageEmisListApi[]): void {
+    if (!rows.length) {
+      this.error = 'Aucun message MX émis trouvé pour ce virement.';
+      return;
+    }
+    const selected = rows[rows.length - 1];
+    this.fileName = (selected.nom || '').trim() || '—';
+    this.filePath = (selected.path || '').trim() || '—';
+    this.virementsService.getMessageEmisXmlByRow(selected).subscribe({
       next: (xml) => {
         this.xmlContent = xml || '';
-        this.sourceLabel = 'EMIS';
+        if (!this.xmlContent) this.error = 'Le message est vide.';
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Aucun message MX archive pour ce virement.';
+        this.error = 'Impossible de lire le fichier MX.';
+        this.cdr.detectChanges();
       }
     });
   }
 
-  private tryFallbackRecu(id: string): void {
-    this.virementsService.getMessageXmlByVirementRecu(id).subscribe({
+  private pickAndLoadRecu(rows: MessageRecuListApi[]): void {
+    if (!rows.length) {
+      this.error = 'Aucun message MX reçu trouvé pour ce virement.';
+      return;
+    }
+    const selected = rows[rows.length - 1];
+    this.fileName = (selected.nom || '').trim() || '—';
+    this.filePath = (selected.path || '').trim() || '—';
+    this.virementsService.getMessageRecuXmlByRow(selected).subscribe({
       next: (xml) => {
         this.xmlContent = xml || '';
-        this.sourceLabel = 'RECU';
+        if (!this.xmlContent) this.error = 'Le message est vide.';
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'Aucun message MX archive pour ce virement.';
+        this.error = 'Impossible de lire le fichier MX.';
+        this.cdr.detectChanges();
       }
     });
   }

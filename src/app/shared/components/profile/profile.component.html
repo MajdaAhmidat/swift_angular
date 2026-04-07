@@ -1,127 +1,157 @@
-<div class="profile-page">
-  <div class="profile-card">
-    <header class="profile-card__header">
-      <h1>Profil administrateur</h1>
-      <p class="profile-card__subtitle">Gestion de votre compte et mot de passe</p>
-    </header>
+<div class="page-body stagger profile-page">
+  <div class="bmce-card section-card" *ngIf="!loadingProfile">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">Informations du profil</div>
+    </div>
+    <div class="bmce-card__body">
+      <p class="profile-message success" *ngIf="messageProfile">{{ messageProfile }}</p>
+      <p class="profile-message error" *ngIf="messageErrorProfile">{{ messageErrorProfile }}</p>
 
-    <section class="profile-info" *ngIf="!loadingProfile">
-      <h2>Informations du compte</h2>
+      <div class="detail-grid" *ngIf="!editMode">
+        <div class="detail-item"><div class="detail-item__label">Identifiant</div><div class="detail-item__value">{{ profile?.idUser ?? '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Email professionnel</div><div class="detail-item__value detail-item__value--mono">{{ profile?.email || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Nom</div><div class="detail-item__value">{{ profile?.nom || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Prénom</div><div class="detail-item__value">{{ profile?.prenom || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Téléphone</div><div class="detail-item__value">{{ profile?.telephone || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Département</div><div class="detail-item__value">{{ profile?.departement || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Poste</div><div class="detail-item__value">{{ profile?.poste || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Statut compte</div><div class="detail-item__value">{{ profile?.statut || '—' }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Rôle</div><div class="detail-item__value">{{ roleLabel }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Statut</div><div class="detail-item__value">{{ actifLabel }}</div></div>
+        <div class="detail-item"><div class="detail-item__label">Date de création</div><div class="detail-item__value">{{ createdAtFormatted }}</div></div>
+      </div>
 
-      <!-- Mode affichage : toutes les infos en lecture seule + bouton Modifier -->
-      <ng-container *ngIf="!editMode">
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Identifiant</span>
-          <span class="profile-field__value">{{ profile?.idUser ?? '—' }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Email professionnel</span>
-          <span class="profile-field__value">{{ profile?.email }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Nom</span>
-          <span class="profile-field__value">{{ profile?.nom || '—' }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Prénom</span>
-          <span class="profile-field__value">{{ profile?.prenom || '—' }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Rôle</span>
-          <span class="profile-field__value">{{ roleLabel }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Statut</span>
-          <span class="profile-field__value">{{ actifLabel }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Date de création</span>
-          <span class="profile-field__value">{{ createdAtFormatted }}</span>
-        </div>
-        <button type="button" class="btn btn--secondary" (click)="startEdit()">Modifier</button>
-        <p class="profile-message success" *ngIf="messageProfile">{{ messageProfile }}</p>
-        <p class="profile-message error" *ngIf="messageErrorProfile">{{ messageErrorProfile }}</p>
-      </ng-container>
-
-      <!-- Mode édition : nom/prénom modifiables, reste en lecture seule -->
       <form *ngIf="editMode" (ngSubmit)="saveProfile()">
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Identifiant</span>
-          <span class="profile-field__value">{{ profile?.idUser ?? '—' }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Email professionnel</span>
-          <span class="profile-field__value">{{ profile?.email }}</span>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Nom</span>
-          <input type="text" [(ngModel)]="nom" name="nom" class="profile-field__input" placeholder="Votre nom" />
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Prénom</span>
-          <input type="text" [(ngModel)]="prenom" name="prenom" class="profile-field__input" placeholder="Votre prénom" />
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Rôle</span>
-          <span class="profile-field__value">{{ roleLabel }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Statut</span>
-          <span class="profile-field__value">{{ actifLabel }}</span>
-        </div>
-        <div class="profile-field profile-field--readonly">
-          <span class="profile-field__label">Date de création</span>
-          <span class="profile-field__value">{{ createdAtFormatted }}</span>
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label class="form-label">Email professionnel</label>
+            <input type="email" [(ngModel)]="email" name="email" class="form-control" placeholder="email@..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom</label>
+            <input type="text" [(ngModel)]="nom" name="nom" class="form-control" placeholder="Votre nom" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prénom</label>
+            <input type="text" [(ngModel)]="prenom" name="prenom" class="form-control" placeholder="Votre prénom" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Téléphone</label>
+            <input type="text" [(ngModel)]="telephone" name="telephone" class="form-control" placeholder="+212..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Département</label>
+            <input type="text" [(ngModel)]="departement" name="departement" class="form-control" placeholder="Département" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Poste</label>
+            <input type="text" [(ngModel)]="poste" name="poste" class="form-control" placeholder="Poste" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut compte</label>
+            <select [(ngModel)]="statut" name="statut" class="form-select" (ngModelChange)="onStatutChange($event)">
+              <option value="actif">actif</option>
+              <option value="inactif">inactif</option>
+              <option value="suspendu">suspendu</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;padding-top:28px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" [(ngModel)]="actif" name="actif" (ngModelChange)="onActifChange($event)" style="width:16px;height:16px;accent-color:var(--bmce-navy);" />
+              <span>Compte actif</span>
+            </label>
+          </div>
         </div>
         <div class="profile-actions">
           <button type="submit" class="btn btn--primary" [disabled]="savingProfile">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
             {{ savingProfile ? 'Enregistrement…' : 'Enregistrer' }}
           </button>
-          <button type="button" class="btn btn--ghost" (click)="cancelEdit()" [disabled]="savingProfile">Annuler</button>
+          <button type="button" class="btn btn--ghost" (click)="cancelEdit()" [disabled]="savingProfile">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 6L6 18"></path>
+              <path d="M6 6l12 12"></path>
+            </svg>
+            Annuler
+          </button>
         </div>
-        <p class="profile-message error" *ngIf="messageErrorProfile">{{ messageErrorProfile }}</p>
       </form>
-    </section>
-    <section class="profile-info" *ngIf="loadingProfile">
+    </div>
+    <div class="table-actions" *ngIf="!editMode">
+      <button type="button" class="btn btn--secondary" (click)="startEdit()">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Modifier
+      </button>
+    </div>
+  </div>
+
+  <div class="bmce-card section-card" *ngIf="loadingProfile">
+    <div class="bmce-card__body">
       <p class="profile-loading">Chargement du profil…</p>
-    </section>
+    </div>
+  </div>
 
-    <section class="profile-password">
-      <h2>Mot de passe</h2>
-
-      <!-- Mode affichage : bouton Modifier le mot de passe -->
+  <div class="bmce-card section-card">
+    <div class="bmce-card__header">
+      <div class="bmce-card__title">Mot de passe</div>
+    </div>
+    <div class="bmce-card__body">
       <ng-container *ngIf="!editPasswordMode">
         <p class="profile-password__mask">••••••••</p>
-        <button type="button" class="btn btn--secondary" (click)="startEditPassword()">Modifier le mot de passe</button>
         <p class="profile-message success" *ngIf="message">{{ message }}</p>
       </ng-container>
-
-      <!-- Mode édition : formulaire mot de passe + Enregistrer / Annuler -->
       <form *ngIf="editPasswordMode" (ngSubmit)="changePassword()">
-        <label>
-          Mot de passe actuel
-          <input type="password" [(ngModel)]="currentPassword" name="currentPassword" required />
-        </label>
-        <label>
-          Nouveau mot de passe
-          <input type="password" [(ngModel)]="newPassword" name="newPassword" required minlength="4" />
-        </label>
-        <label>
-          Confirmer le nouveau mot de passe
-          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required />
-        </label>
-        <div class="profile-actions">
-          <button type="submit" class="btn btn--primary" [disabled]="loading">
-            {{ loading ? 'Enregistrement…' : 'Enregistrer' }}
-          </button>
-          <button type="button" class="btn btn--ghost" (click)="cancelEditPassword()" [disabled]="loading">Annuler</button>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mot de passe actuel</label>
+            <input type="password" [(ngModel)]="currentPassword" name="currentPassword" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nouveau mot de passe</label>
+            <input type="password" [(ngModel)]="newPassword" name="newPassword" class="form-control" required minlength="4" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmer le nouveau mot de passe</label>
+            <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-control" required />
+          </div>
         </div>
         <p class="profile-message error" *ngIf="messageError">{{ messageError }}</p>
+        <div class="profile-actions">
+          <button type="submit" class="btn btn--primary" [disabled]="loading">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            {{ loading ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+          <button type="button" class="btn btn--ghost" (click)="cancelEditPassword()" [disabled]="loading">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 6L6 18"></path>
+              <path d="M6 6l12 12"></path>
+            </svg>
+            Annuler
+          </button>
+        </div>
       </form>
-    </section>
-
-    <footer class="profile-card__footer">
-      <a routerLink="/dashboard/grafana" class="btn btn--secondary">Retour à l'accueil</a>
-    </footer>
+    </div>
+    <div class="table-actions">
+      <button type="button" class="btn btn--secondary" *ngIf="!editPasswordMode" (click)="startEditPassword()">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Modifier
+      </button>
+      <a routerLink="/dashboard/grafana" class="btn btn--ghost">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+        Retour
+      </a>
+    </div>
   </div>
 </div>

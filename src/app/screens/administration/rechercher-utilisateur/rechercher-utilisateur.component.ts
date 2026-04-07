@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
 import { UtilisateurService, UtilisateurApi } from '../../../shared/services/utilisateur.service';
 
@@ -36,6 +36,7 @@ export class RechercherUtilisateurComponent implements OnInit {
 
   constructor(
     private utilisateurService: UtilisateurService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -87,6 +88,21 @@ export class RechercherUtilisateurComponent implements OnInit {
     });
   }
 
+  get countTotal(): number { return this.users.length; }
+  get countSuperviseur(): number { return this.users.filter(u => u.profil === 'superviseur').length; }
+  get countAdministrateur(): number { return this.users.filter(u => u.profil === 'administrateur' || u.profil === 'admin').length; }
+  get countActif(): number { return this.users.filter(u => u.statut === 'actif').length; }
+  get countInactif(): number { return this.users.filter(u => u.statut === 'inactif').length; }
+  get countSuspendu(): number { return this.users.filter(u => u.statut === 'suspendu').length; }
+
+  setProfil(value: string): void {
+    this.filtre.profil = value;
+  }
+
+  setStatut(value: string): void {
+    this.filtre.statut = value;
+  }
+
   badgeProfil(p: string) {
     return { lecteur: 'badge--gray', operateur: 'badge--navy', superviseur: 'badge--orange', administrateur: 'badge--red' }[p] || 'badge--gray';
   }
@@ -98,6 +114,10 @@ export class RechercherUtilisateurComponent implements OnInit {
   }
   avatarColors = ['#1B3A6B', '#00B4D8', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'];
   avatarColor(i: number) { return this.avatarColors[i % this.avatarColors.length]; }
+
+  openUserDetails(u: UserRow): void {
+    this.router.navigate(['/administration/droits', u.id]);
+  }
 
   supprimerUtilisateur(u: UserRow): void {
     const ok = window.confirm(`Confirmer la suppression de l'utilisateur ${u.nom} ?`);
@@ -120,5 +140,9 @@ export class RechercherUtilisateurComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  goToCreateUtilisateur(): void {
+    this.router.navigate(['/administration/creer-utilisateur']);
   }
 }

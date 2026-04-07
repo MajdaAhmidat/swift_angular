@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TopbarComponent } from '../../../shared/components/topbar/topbar.component';
+import { AuthService } from '../../../shared/services/auth.service';
 import { FiltreVirement } from '../../../shared/models/virement.model';
 import {
   SopApi,
@@ -22,6 +23,7 @@ type StatutFilter    = 'tous' | 'rapproche' | 'non-rapproche' | 'en-attente';
   styleUrls:   ['./recherche-virements.component.scss']
 })
 export class RechercheVirementsComponent implements OnInit {
+  readonly auth = inject(AuthService);
 
   filtre: FiltreVirement = {
     reference: '', sop: '', dateDebut: '', dateFin: '',
@@ -133,6 +135,58 @@ export class RechercheVirementsComponent implements OnInit {
       statut:'', emetteurBic:'', montantMin:undefined, montantMax:undefined,
       compteBeneficiaire:'', compteDonneurOrdre:'', direction:'tous'
     };
+    this.directionActive.set('tous');
+    this.statutActif.set('tous');
+    this.cdr.detectChanges();
+  }
+
+  exporterCsv(): void {
+    const rows = this.virementsFiltres;
+    if (!rows.length) return;
+    const header = [
+      'Reference',
+      'Direction',
+      'Emetteur',
+      'BIC Emetteur',
+      'Beneficiaire',
+      'Compte Beneficiaire',
+      'Compte Donneur Ordre',
+      'Montant',
+      'SOP',
+      'Date Valeur',
+      'Statut'
+    ];
+    const lines = rows.map((v) => [
+      v.ref,
+      v.direction,
+      v.emetteur,
+      v.emetteurBic,
+      v.beneficiaire,
+      v.beneficiaireIban,
+      v.compteDonneurOrdre,
+      String(v.montant ?? ''),
+      v.sop,
+      v.date,
+      v.statut
+    ].map((cell) => this.escapeCsvCell(cell)).join(';'));
+    const csv = [header.map((h) => this.escapeCsvCell(h)).join(';'), ...lines].join('\r\n');
+    const csvWithBom = '\uFEFF' + csv;
+    const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `virements-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  private escapeCsvCell(value: unknown): string {
+    const text = String(value ?? '')
+      .replace(/\r?\n|\r/g, ' ')
+      .replace(/"/g, '""');
+    return `"${text}"`;
   }
 
   get totalMontant(): number {

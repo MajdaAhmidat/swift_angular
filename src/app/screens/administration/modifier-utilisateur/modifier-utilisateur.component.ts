@@ -95,6 +95,17 @@ export class ModifierUtilisateurComponent implements OnInit {
     return (p + n).toUpperCase() || '?';
   }
 
+  onActifChange(value: boolean): void {
+    this.user.actif = !!value;
+    this.user.statut = this.user.actif ? 'actif' : 'inactif';
+  }
+
+  onStatutChange(value: string): void {
+    const normalized = (value || '').toLowerCase();
+    this.user.statut = normalized === 'actif' ? 'actif' : 'inactif';
+    this.user.actif = this.user.statut === 'actif';
+  }
+
   submit(): void {
     if (!this.user.idUser || !this.user.idRoleRole) return;
     this.error = '';
@@ -103,12 +114,12 @@ export class ModifierUtilisateurComponent implements OnInit {
     this.utilisateurService.update(this.user).subscribe({
       next: () => {
         this.saving = false;
-        this.messageSuccess = 'Modifications enregistrées.';
+        this.messageSuccess = 'Confirmation: les modifications de cet utilisateur ont ete enregistrees avec succes.';
         this.cdr.detectChanges();
       },
       error: () => {
         this.saving = false;
-        this.error = 'Erreur lors de l\'enregistrement.';
+        this.error = 'Refus: impossible d\'enregistrer les modifications. Verifiez les informations et reessayez.';
         this.cdr.detectChanges();
       }
     });

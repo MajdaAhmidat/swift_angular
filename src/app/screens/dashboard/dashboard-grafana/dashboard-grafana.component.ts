@@ -20,12 +20,6 @@ import { AuthService } from '../../../shared/services/auth.service';
   styleUrls: ['./dashboard-grafana.component.scss']
 })
 export class DashboardGrafanaComponent implements OnInit {
-  readonly pacsOptions = [
-    { value: '__all', label: 'Tous les PACS' },
-    { value: 'pacs.008.001.08', label: 'PACS.008' },
-    { value: 'pacs.009.001.08', label: 'PACS.009' }
-  ];
-
   readonly messageTypeOptions = [
     { value: '__all', label: 'Tous les messages' },
     { value: 'Emis ACK', label: 'EMIS ACK' },
@@ -84,7 +78,16 @@ export class DashboardGrafanaComponent implements OnInit {
     this.http.get<any[]>('/api/sops', { headers }).subscribe({
       next: (data) => {
         console.log('SOPs chargés :', data);
-        this.sops = data;
+        this.sops = data || [];
+        if (this.sops.length) {
+          const latest = [...this.sops].sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0))[0];
+          if (latest?.id != null) {
+            this.selectedSopId = String(latest.id);
+            this.refreshNonce++;
+          }
+        } else {
+          this.selectedSopId = '';
+        }
         this.loading = false;
         this.cdr.detectChanges();
       },

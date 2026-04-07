@@ -1,9 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
+const PERMISSIONS_KEY = 'user_permissions';
 
 interface LoginResponse {
   token: string;
@@ -20,12 +23,27 @@ export interface UserAuth {
   prenom?: string;
 }
 
+type PermissionAction = 'lire' | 'creer' | 'modifier' | 'supprimer' | 'valider';
+type PermissionMatrixApi = {
+  module: string;
+  lire: boolean;
+  creer: boolean;
+  modifier: boolean;
+  supprimer: boolean;
+  valider: boolean;
+};
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private userSig = signal<UserAuth | null>(this.loadStoredUser());
+  private permissionsSig = signal<Record<string, PermissionMatrixApi>>(this.loadStoredPermissions());
+  private permissionsLoadedSig = signal<boolean>(false);
 
   constructor(private http: HttpClient) {
     this.restoreFromStorage();
+    if (this.getToken() && this.currentUser()) {
+      this.ensurePermissionsLoaded().subscribe();
+    }
   }
 
   private loadStoredUser(): UserAuth | null {
@@ -63,6 +81,9 @@ export class AuthService {
     if (localStorage.getItem(TOKEN_KEY) && !this.userSig()) {
       this.userSig.set(this.loadStoredUser());
     }
+    if (localStorage.getItem(PERMISSIONS_KEY)) {
+      this.permissionsLoadedSig.set(true);
+    }
   }
 
   login(email: string, password: string) {
@@ -77,13 +98,20 @@ export class AuthService {
         };
         localStorage.setItem(USER_KEY, JSON.stringify(user));
         this.userSig.set(user);
+        this.permissionsSig.set({});
+        this.permissionsLoadedSig.set(false);
+        localStorage.removeItem(PERMISSIONS_KEY);
+        this.ensurePermissionsLoaded().subscribe();
       }));
   }
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(PERMISSIONS_KEY);
     this.userSig.set(null);
+    this.permissionsSig.set({});
+    this.permissionsLoadedSig.set(false);
   }
 
   getToken(): string | null {
@@ -108,6 +136,84 @@ export class AuthService {
     return this.userSig()?.role === 'ADMIN';
   }
 
+  hasPermission(module: string, action: PermissionAction = 'lire'): boolean {
+    if (this.isAdmin()) return true;
+    const key = this.normalizeModule(module);
+    const p = this.permissionsSig()[key];
+    return !!p?.[action];
+  }
+
+  ensurePermissionsLoaded(forceRefresh = false): Observable<boolean> {
+    if (!this.getToken() || !this.currentUser()) return of(false);
+    if (this.isAdmin()) {
+      this.permissionsLoadedSig.set(true);
+      return of(true);
+    }
+    if (this.permissionsLoadedSig() && !forceRefresh) return of(true);
+    const token = this.getToken();
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
+    return this.http.get<PermissionMatrixApi[]>('/api/auth/me/permissions', { headers }).pipe(
+      tap((rows) => this.storePermissions(rows || [])),
+      map(() => true),
+      catchError(() => {
+        // Do not wipe previously loaded permissions on transient API failure.
+        // Keep the last known state to avoid hiding the entire UI unexpectedly.
+        if (!this.permissionsLoadedSig()) {
+          this.permissionsLoadedSig.set(true);
+        }
+        return of(true);
+      })
+    );
+  }
+
+  private loadStoredPermissions(): Record<string, PermissionMatrixApi> {
+    try {
+      const raw = localStorage.getItem(PERMISSIONS_KEY);
+      if (!raw) return {};
+      const rows = JSON.parse(raw) as PermissionMatrixApi[];
+      return this.buildPermissionMap(rows || []);
+    } catch {
+      return {};
+    }
+  }
+
+  private storePermissions(rows: PermissionMatrixApi[]): void {
+    const normalized = (rows || []).map((r) => ({
+      module: this.normalizeModule(r.module),
+      lire: !!r.lire,
+      creer: !!r.creer,
+      modifier: !!r.modifier,
+      supprimer: !!r.supprimer,
+      valider: !!r.valider
+    }));
+    localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(normalized));
+    this.permissionsSig.set(this.buildPermissionMap(normalized));
+    this.permissionsLoadedSig.set(true);
+  }
+
+  private buildPermissionMap(rows: PermissionMatrixApi[]): Record<string, PermissionMatrixApi> {
+    const map: Record<string, PermissionMatrixApi> = {};
+    (rows || []).forEach((r) => {
+      const key = this.normalizeModule(r.module);
+      if (!key) return;
+      map[key] = {
+        module: key,
+        lire: !!r.lire,
+        creer: !!r.creer,
+        modifier: !!r.modifier,
+        supprimer: !!r.supprimer,
+        valider: !!r.valider
+      };
+    });
+    return map;
+  }
+
+  private normalizeModule(module: string): string {
+    return (module || '').trim().toLowerCase().replace(/-/g, '_').replace(/\s+/g, '_');
+  }
+
   getProfile() {
     return this.http.get<{
       idUser?: number;
@@ -115,6 +221,10 @@ export class AuthService {
       roleCode: string;
       nom: string;
       prenom: string;
+      telephone?: string;
+      departement?: string;
+      poste?: string;
+      statut?: string;
       actif?: boolean;
       createdAt?: string | null;
     }>('/api/auth/me', {
@@ -122,8 +232,17 @@ export class AuthService {
     });
   }
 
-  updateProfile(nom: string, prenom: string) {
-    return this.http.patch('/api/auth/me', { nom, prenom }, {
+  updateProfile(payload: {
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone?: string;
+    departement?: string;
+    poste?: string;
+    statut?: string;
+    actif: boolean;
+  }) {
+    return this.http.patch('/api/auth/me', payload, {
       headers: { Authorization: `Bearer ${this.getToken()}` }
     });
   }

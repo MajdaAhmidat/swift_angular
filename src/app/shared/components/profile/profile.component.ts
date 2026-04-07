@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -18,11 +18,21 @@ export class ProfileComponent implements OnInit {
     roleCode: string;
     nom: string;
     prenom: string;
+    telephone?: string;
+    departement?: string;
+    poste?: string;
+    statut?: string;
     actif?: boolean;
     createdAt?: string | null;
   } | null = null;
   nom = '';
   prenom = '';
+  email = '';
+  telephone = '';
+  departement = '';
+  poste = '';
+  statut = 'actif';
+  actif = true;
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
@@ -36,26 +46,18 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   editPasswordMode = false;
 
-  constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.auth.getProfile().subscribe({
       next: (res) => {
-        this.profile = {
-          idUser: res.idUser,
-          email: res.email || '',
-          roleCode: res.roleCode || '',
-          nom: res.nom || '',
-          prenom: res.prenom || '',
-          actif: res.actif,
-          createdAt: res.createdAt ?? null
-        };
-        this.nom = this.profile.nom;
-        this.prenom = this.profile.prenom;
+        this.applyProfileState(res);
         this.loadingProfile = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingProfile = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -89,16 +91,40 @@ export class ProfileComponent implements OnInit {
 
   startEdit(): void {
     this.editMode = true;
+    this.editPasswordMode = true;
     this.nom = this.profile?.nom ?? '';
     this.prenom = this.profile?.prenom ?? '';
+    this.email = this.profile?.email ?? '';
+    this.telephone = this.profile?.telephone ?? '';
+    this.departement = this.profile?.departement ?? '';
+    this.poste = this.profile?.poste ?? '';
+    this.statut = this.profile?.statut ?? (this.profile?.actif === false ? 'inactif' : 'actif');
+    this.actif = this.profile?.actif !== false;
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.message = '';
+    this.messageError = '';
     this.messageProfile = '';
     this.messageErrorProfile = '';
   }
 
   cancelEdit(): void {
     this.editMode = false;
+    this.editPasswordMode = false;
     this.nom = this.profile?.nom ?? '';
     this.prenom = this.profile?.prenom ?? '';
+    this.email = this.profile?.email ?? '';
+    this.telephone = this.profile?.telephone ?? '';
+    this.departement = this.profile?.departement ?? '';
+    this.poste = this.profile?.poste ?? '';
+    this.statut = this.profile?.statut ?? (this.profile?.actif === false ? 'inactif' : 'actif');
+    this.actif = this.profile?.actif !== false;
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.message = '';
+    this.messageError = '';
     this.messageProfile = '';
     this.messageErrorProfile = '';
   }
@@ -107,22 +133,91 @@ export class ProfileComponent implements OnInit {
     this.messageProfile = '';
     this.messageErrorProfile = '';
     this.savingProfile = true;
-    this.auth.updateProfile(this.nom, this.prenom).subscribe({
+    this.statut = this.actif ? 'actif' : 'inactif';
+    this.auth.updateProfile({
+      nom: this.nom,
+      prenom: this.prenom,
+      email: this.email,
+      telephone: this.telephone,
+      departement: this.departement,
+      poste: this.poste,
+      statut: this.statut,
+      actif: this.actif
+    }).subscribe({
       next: () => {
         this.savingProfile = false;
         this.editMode = false;
         this.messageProfile = 'Informations enregistrées.';
-        if (this.profile) {
-          this.profile.nom = this.nom;
-          this.profile.prenom = this.prenom;
-        }
+        this.profile = {
+          ...(this.profile ?? {
+            idUser: undefined,
+            roleCode: '',
+            createdAt: null
+          }),
+          email: this.email,
+          nom: this.nom,
+          prenom: this.prenom,
+          telephone: this.telephone,
+          departement: this.departement,
+          poste: this.poste,
+          statut: this.statut,
+          actif: this.actif
+        };
         this.auth.setProfileNames(this.nom, this.prenom);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.savingProfile = false;
         this.messageErrorProfile = 'Erreur lors de l\'enregistrement.';
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  onActifChange(value: boolean): void {
+    this.actif = value;
+    this.statut = value ? 'actif' : 'inactif';
+  }
+
+  onStatutChange(value: string): void {
+    this.statut = value;
+    this.actif = value === 'actif';
+  }
+
+  private applyProfileState(res: {
+    idUser?: number;
+    email?: string;
+    roleCode?: string;
+    nom?: string;
+    prenom?: string;
+    telephone?: string;
+    departement?: string;
+    poste?: string;
+    statut?: string;
+    actif?: boolean;
+    createdAt?: string | null;
+  }): void {
+    this.profile = {
+      idUser: res.idUser,
+      email: res.email || '',
+      roleCode: res.roleCode || '',
+      nom: res.nom || '',
+      prenom: res.prenom || '',
+      telephone: res.telephone || '',
+      departement: res.departement || '',
+      poste: res.poste || '',
+      statut: res.statut || 'actif',
+      actif: res.actif,
+      createdAt: res.createdAt ?? null
+    };
+    this.nom = this.profile.nom;
+    this.prenom = this.profile.prenom;
+    this.email = this.profile.email;
+    this.telephone = this.profile.telephone || '';
+    this.departement = this.profile.departement || '';
+    this.poste = this.profile.poste || '';
+    this.statut = this.profile.statut || (this.profile.actif === false ? 'inactif' : 'actif');
+    this.actif = this.profile.actif !== false;
   }
 
   startEditPassword(): void {
@@ -163,6 +258,7 @@ export class ProfileComponent implements OnInit {
         this.currentPassword = '';
         this.newPassword = '';
         this.confirmPassword = '';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loading = false;
@@ -171,6 +267,7 @@ export class ProfileComponent implements OnInit {
         } else {
           this.messageError = 'Une erreur est survenue. Réessayez.';
         }
+        this.cdr.detectChanges();
       }
     });
   }

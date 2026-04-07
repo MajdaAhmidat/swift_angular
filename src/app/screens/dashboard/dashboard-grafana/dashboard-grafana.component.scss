@@ -2,47 +2,31 @@
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 120px);
-  padding: 1.5rem;
+  padding: 1rem 1.25rem 1.25rem;
   gap: 1rem;
   overflow-y: auto;
   overflow-x: hidden;
   min-width: 0;
-  background: #f8fafc;
+  background: #f6f8fc;
 
-  .filters-card {
-    background: #ffffff;
-    border: 1px solid #dbe4f0;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
-    padding: 1rem 1.25rem 1.25rem;
-
-    &__header {
-      margin-bottom: 1rem;
-
-      h2 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #0f172a;
-      }
-
-      p {
-        margin: 0.35rem 0 0;
-        font-size: 0.86rem;
-        color: #64748b;
-      }
-    }
+  .dashboard-filter-card {
+    margin-bottom: 2px;
   }
 
   &__filters {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 0.8rem;
 
     .filters-row {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.9rem 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem 0.85rem;
+    }
+
+    .filters-row--main {
+      grid-template-columns: minmax(280px, 1.4fr) minmax(200px, 1fr) minmax(200px, 1fr);
+      align-items: end;
     }
 
     .filters-row--dates {
@@ -53,47 +37,85 @@
     .filter-field {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.3rem;
       min-width: 0;
     }
 
-    .filter-field--wide {
-      grid-column: span 2;
-    }
-
     label {
-      font-weight: 600;
-      font-size: 0.8rem;
-      color: #334155;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--gray-600);
     }
 
     .filter-input {
-      height: 40px;
-      padding: 0.45rem 0.75rem;
-      border: 1px solid #c7d2e5;
-      border-radius: 8px;
+      height: 42px;
+      padding: 0.45rem 0.7rem;
+      border: 1px solid var(--gray-200);
+      border-radius: 7px;
       background-color: #ffffff;
-      color: #0f172a;
-      font-size: 0.9rem;
+      color: var(--gray-700);
+      font-size: 12px;
       cursor: pointer;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
       &:focus {
         outline: none;
-        border-color: #245090;
-        box-shadow: 0 0 0 3px rgba(36, 80, 144, 0.12);
+        border-color: var(--navy-500);
+        box-shadow: 0 0 0 3px rgba(26, 58, 112, 0.08);
       }
     }
 
     .filter-input--date {
       min-width: 0;
     }
+
+    .filter-input--date-pro {
+      background-color: #fbfdff;
+      border-color: #cfd8e6;
+      font-weight: 600;
+      letter-spacing: 0.1px;
+    }
+
+  }
+
+  .pacs-switch-row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .pacs-switch {
+    display: flex;
+  }
+
+  .message-switch {
+    flex-wrap: wrap;
+  }
+
+  .pacs-switch--right {
+    margin-left: 8px;
+  }
+
+  .pacs-switch__icon {
+    font-size: 12px;
+    line-height: 1;
+    width: 12px;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .toggle-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--gray-200);
   }
 
   .feedback {
     border-radius: 8px;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.88rem;
+    padding: 0.65rem 0.8rem;
+    font-size: 12px;
     border: 1px solid transparent;
   }
 
@@ -160,13 +182,13 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .filters-row--main {
+        grid-template-columns: 1fr;
+      }
+
       .filters-row--dates {
         grid-template-columns: repeat(2, minmax(200px, 260px));
       }
-    }
-
-    .filter-field--wide {
-      grid-column: span 2;
     }
 
     .grafana-container {
@@ -188,9 +210,6 @@
       }
     }
 
-    .filter-field--wide {
-      grid-column: auto;
-    }
   }
 
   .select-placeholder {
@@ -206,7 +225,23 @@
 
     .placeholder-content {
       max-width: 400px;
-      .info-icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
+      .info-icon {
+        width: 28px;
+        height: 28px;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #eaf1fb;
+        color: var(--navy-700);
+        font-style: normal;
+        font-weight: 700;
+      }
+      p {
+        font-size: 12px;
+        font-weight: 600;
+      }
     }
   }
 }

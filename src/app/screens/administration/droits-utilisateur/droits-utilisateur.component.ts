@@ -29,6 +29,7 @@ export class DroitsUtilisateurComponent implements OnInit {
   roles: RoleApi[] = [];
   loading = true;
   saving = false;
+  editMode = false;
   error = '';
   messageSuccess = '';
 
@@ -48,6 +49,10 @@ export class DroitsUtilisateurComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((q) => {
+      this.editMode = q.get('edit') === '1';
+      this.cdr.detectChanges();
+    });
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.loading = false;
@@ -139,8 +144,7 @@ export class DroitsUtilisateurComponent implements OnInit {
   }
 
   canEditPermission(module: ModuleDroit, permission: keyof Pick<ModuleDroit, 'lire' | 'creer' | 'modifier' | 'supprimer' | 'valider'>): boolean {
-    // Édition manuelle complète des droits depuis l'écran.
-    return true;
+    return this.editMode;
   }
 
   onPermissionChange(module: ModuleDroit, permission: keyof Pick<ModuleDroit, 'lire' | 'creer' | 'modifier' | 'supprimer' | 'valider'>): void {
@@ -171,7 +175,17 @@ export class DroitsUtilisateurComponent implements OnInit {
     return this.user?.actif !== false;
   }
   set actif(v: boolean) {
-    if (this.user) this.user.actif = v;
+    if (this.user) {
+      this.user.actif = v;
+      this.user.statut = v ? 'actif' : 'inactif';
+    }
+  }
+
+  get createdAtLabel(): string {
+    if (!this.user?.createdAt) return '-';
+    const d = new Date(this.user.createdAt);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
   save(): void {
@@ -202,26 +216,26 @@ export class DroitsUtilisateurComponent implements OnInit {
       next: () => {
         if (!idUserToSave) {
           this.saving = false;
-          this.messageSuccess = 'Droits enregistrés.';
+          this.messageSuccess = 'Confirmation: les droits utilisateur ont ete enregistres avec succes.';
           this.cdr.detectChanges();
           return;
         }
         this.utilisateurService.saveUserPermissions(idUserToSave, matrix).subscribe({
           next: () => {
             this.saving = false;
-            this.messageSuccess = 'Droits enregistrés.';
+            this.messageSuccess = 'Confirmation: les droits utilisateur ont ete enregistres avec succes.';
             this.cdr.detectChanges();
           },
           error: () => {
             this.saving = false;
-            this.error = 'Utilisateur sauvegardé, mais échec de la sauvegarde des permissions utilisateur.';
+            this.error = 'Refus partiel: utilisateur mis a jour, mais enregistrement des permissions impossible.';
             this.cdr.detectChanges();
           }
         });
       },
       error: () => {
         this.saving = false;
-        this.error = 'Erreur lors de l\'enregistrement.';
+        this.error = 'Refus: impossible d\'enregistrer les droits utilisateur.';
         this.cdr.detectChanges();
       }
     });

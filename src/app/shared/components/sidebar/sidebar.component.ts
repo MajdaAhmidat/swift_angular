@@ -8,6 +8,7 @@ interface NavItem {
   route: string;
   icon: string;
   badge?: number;
+  permission?: { module: string; action?: 'lire' | 'creer' | 'modifier' | 'supprimer' | 'valider' };
 }
 
 interface NavSection {
@@ -27,20 +28,32 @@ export class SidebarComponent {
   profileOpen = false;
 
   constructor(public auth: AuthService, private router: Router) {
+    this.buildNavSections();
+    this.auth.ensurePermissionsLoaded(true).subscribe(() => this.buildNavSections());
+  }
+
+  private buildNavSections(): void {
     const common: NavSection[] = [
       {
         label: 'Tableaux de bord',
         items: [
-          { label: 'Accueil', route: '/dashboard/grafana', icon: 'home' },
+          {
+            label: 'Accueil',
+            route: '/dashboard/grafana',
+            icon: 'home',
+            permission: { module: 'tableaux_bord', action: 'lire' }
+          }
         ]
       },
       {
         label: 'Virements',
         items: [
-          { label: 'Recherche des virements', route: '/virements/recherche',       icon: 'search'    },
-          { label: 'Consulter un virement',   route: '/virements/consulter/1',     icon: 'file-text' },
-          { label: 'Messages MX',             route: '/virements/message-mx/1',    icon: 'mail'      },
-          { label: 'Non rapprochés',          route: '/virements/non-rapproches',  icon: 'clock',    badge: 24 },
+          {
+            label: 'Recherche des virements',
+            route: '/virements/recherche',
+            icon: 'search',
+            permission: { module: 'virements', action: 'lire' }
+          }
         ]
       }
     ];
@@ -48,17 +61,27 @@ export class SidebarComponent {
     const adminSection: NavSection = {
       label: 'Administration',
       items: [
-        { label: 'Créer utilisateur',       route: '/administration/creer-utilisateur', icon: 'user-plus'   },
-        { label: 'Droits utilisateurs',     route: '/administration/droits/1',           icon: 'lock'        },
-        { label: 'Rechercher utilisateur',  route: '/administration/rechercher',         icon: 'users'       },
-        { label: 'Modifier utilisateur',    route: '/administration/modifier/1',         icon: 'user-edit'   },
+        { label: 'Rechercher utilisateur', route: '/administration/rechercher', icon: 'users' }
       ]
     };
 
-    this.navSections = [...common];
-    if (this.auth.isAdmin()) {
-      this.navSections.push(adminSection);
+    const filteredCommon: NavSection[] = common
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => this.canAccessItem(item))
+      }))
+      .filter((section) => section.items.length > 0);
+
+    this.navSections = [...filteredCommon];
+    if (this.auth.isAdmin()) this.navSections.push(adminSection);
+  }
+
+  private canAccessItem(item: NavItem): boolean {
+    if (this.auth.isAdmin()) return true;
+    if (item.permission) {
+      return this.auth.hasPermission(item.permission.module, item.permission.action || 'lire');
     }
+    return true;
   }
 
   get initials(): string {

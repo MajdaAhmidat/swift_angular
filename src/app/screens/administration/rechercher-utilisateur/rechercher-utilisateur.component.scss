@@ -1,1 +1,78 @@
-// Styles spécifiques — voir styles.scss pour le design system BMCE
+.dashboard-filter-card {
+  margin-bottom: 16px;
+}
+
+.admin-user-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 0.85rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.filter-field label {
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--gray-600);
+}
+
+.filter-input {
+  height: 42px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 7px;
+  background-color: #ffffff;
+  color: var(--gray-700);
+  font-size: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--navy-500);
+  box-shadow: 0 0 0 3px rgba(26, 58, 112, 0.08);
+}
+
+@media (max-width: 992px) {
+  .filters-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.toggle-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--gray-200);
+}
+
+.filter-chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}

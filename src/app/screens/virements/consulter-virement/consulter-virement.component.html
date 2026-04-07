@@ -1,151 +1,77 @@
 <app-topbar
-  pageTitle="Détail du virement"
-  breadcrumb="Accueil › Virements › Consulter"
-  primaryLabel="Télécharger PDF"
-  secondaryLabel="Message MX">
+  [pageTitle]="virement.reference ? ('Détail virement - ' + virement.reference) : 'Détail du virement'"
+  [breadcrumb]="virement.dateCreation ? ('Accueil › Virements › Consulter › Créé le ' + virement.dateCreation + ' à ' + virement.heureCreation) : 'Accueil › Virements › Consulter'">
 </app-topbar>
 
 <div class="page-body stagger">
-  <div *ngIf="loading" class="state state--loading">
-    Chargement du virement...
+  <div *ngIf="selectionRequired" class="state state--loading">
+    Aucun virement sélectionné. Ouvrez d'abord <b>Recherche des virements</b> puis cliquez sur <b>Consulter</b>.
   </div>
 
-  <div *ngIf="error" class="state state--error">
-    {{ error }}
-  </div>
+  <div *ngIf="loading" class="state state--loading">Chargement du virement...</div>
+  <div *ngIf="error" class="state state--error">{{ error }}</div>
 
-  <!-- ── HEADER VIREMENT ── -->
-  <div class="vir-header" *ngIf="!loading && !error">
+  <div class="vir-header" *ngIf="!selectionRequired && !loading && !error">
     <div class="vir-header__left">
-      <button class="btn btn--ghost btn--sm" routerLink="/virements/recherche">← Retour</button>
-      <div>
-        <div class="vir-header__ref">{{ virement.reference }}</div>
-        <div class="vir-header__meta">
-          Virement SWIFT · Créé le {{ virement.dateCreation }} à {{ virement.heureCreation }}
-        </div>
-      </div>
+      <button class="btn btn--back vir-back-btn" routerLink="/virements/recherche">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        Retour
+      </button>
     </div>
     <div class="vir-header__right">
       <span class="badge vir-header__status" [ngClass]="badgeClass">{{ badgeLabel }}</span>
-      <button class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', virementId]" [queryParams]="{ direction: direction }">Voir message MX</button>
-      <button class="btn btn--primary btn--sm">Télécharger PDF</button>
+      <button *ngIf="auth.hasPermission('messages_mx', 'lire')" class="btn btn--ghost btn--sm" [routerLink]="['/virements/message-mx', virementId]" [queryParams]="{ direction: direction }">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        Voir message MX
+      </button>
     </div>
   </div>
 
-  <!-- ── ALERTE SUCCÈS ── -->
-  <div class="bmce-alert bmce-alert--success" *ngIf="!loading && !error && virement.statut === 'rapproche'">
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M5 13l4 4L19 7"/>
-    </svg>
+  <div class="bmce-alert bmce-alert--success" *ngIf="!selectionRequired && !loading && !error && virement.statut === 'rapproche'">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
     <div>
       <div class="bmce-alert__title">Virement rapproché avec succès</div>
       <div class="bmce-alert__msg">Ce virement a été rapproché automatiquement via {{ virement.sop }}.</div>
     </div>
   </div>
 
-  <!-- ── CONTENU ── -->
-  <div class="gap-row" *ngIf="!loading && !error">
-
-    <!-- Informations générales -->
-    <div class="bmce-card flex-2">
-      <div class="bmce-card__header">
-        <div class="bmce-card__title">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--bmce-navy)" stroke-width="2">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          Informations générales
-        </div>
-      </div>
+  <div class="gap-row" *ngIf="!selectionRequired && !loading && !error">
+    <div class="bmce-card flex-2 vir-main-card">
+      <div class="bmce-card__header"><div class="bmce-card__title">Informations générales</div></div>
       <div class="bmce-card__body">
         <div class="kpi-row">
-          <div class="kpi-card">
-            <div class="kpi-card__label">Montant</div>
-            <div class="kpi-card__value">{{ virement.montant | number:'1.2-2' }} {{ virement.devise }}</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__label">Direction</div>
-            <div class="kpi-card__value">{{ virement.direction === 'emis' ? 'EMIS' : 'RECU' }}</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card__label">Date valeur</div>
-            <div class="kpi-card__value">{{ virement.dateValeur }}</div>
-          </div>
+          <div class="kpi-card"><div class="kpi-card__label">Montant</div><div class="kpi-card__value">{{ virement.montant | number:'1.2-2' }} {{ virement.devise }}</div></div>
+          <div class="kpi-card"><div class="kpi-card__label">Direction</div><div class="kpi-card__value">{{ virement.direction === 'emis' ? 'EMIS' : 'RECU' }}</div></div>
+          <div class="kpi-card"><div class="kpi-card__label">Date valeur</div><div class="kpi-card__value">{{ virement.dateValeur }}</div></div>
         </div>
 
         <div class="section-divider">Émetteur</div>
         <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-item__label">Banque</div>
-            <div class="detail-item__value">{{ virement.emetteur.banque }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">BIC / SWIFT</div>
-            <div class="detail-item__value detail-item__value--mono detail-item__value--navy">{{ virement.emetteur.bic }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Compte IBAN</div>
-            <div class="detail-item__value detail-item__value--mono iban-code">{{ virement.emetteur.iban }}</div>
-          </div>
+          <div class="detail-item"><div class="detail-item__label">Banque</div><div class="detail-item__value">{{ virement.emetteur.banque }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">BIC / SWIFT</div><div class="detail-item__value detail-item__value--mono">{{ virement.emetteur.bic }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">Compte</div><div class="detail-item__value detail-item__value--mono">{{ virement.emetteur.iban }}</div></div>
         </div>
 
         <div class="section-divider">Bénéficiaire</div>
         <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-item__label">Banque</div>
-            <div class="detail-item__value">{{ virement.beneficiaire.banque }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">BIC / SWIFT</div>
-            <div class="detail-item__value detail-item__value--mono detail-item__value--navy">{{ virement.beneficiaire.bic }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Compte IBAN</div>
-            <div class="detail-item__value detail-item__value--mono iban-code">{{ virement.beneficiaire.iban }}</div>
-          </div>
+          <div class="detail-item"><div class="detail-item__label">Banque</div><div class="detail-item__value">{{ virement.beneficiaire.banque }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">BIC / SWIFT</div><div class="detail-item__value detail-item__value--mono">{{ virement.beneficiaire.bic }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">Compte</div><div class="detail-item__value detail-item__value--mono">{{ virement.beneficiaire.iban }}</div></div>
         </div>
 
         <div class="section-divider">Détails du virement</div>
         <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-item__label">Devise</div>
-            <div class="detail-item__value">{{ virement.devise }} — Dirham Marocain</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Référence</div>
-            <div class="detail-item__value detail-item__value--mono">{{ virement.reference }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">SOP</div>
-            <div class="detail-item__value"><span class="badge badge--navy">{{ virement.sop }}</span></div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Compte donneur d'ordre</div>
-            <div class="detail-item__value detail-item__value--mono">{{ virement.compteDonneurOrdre || '-' }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Motif</div>
-            <div class="detail-item__value">{{ virement.motif || '-' }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-item__label">Dernière mise à jour</div>
-            <div class="detail-item__value">{{ virement.updatedAt || '-' }}</div>
-          </div>
+          <div class="detail-item"><div class="detail-item__label">Référence virement</div><div class="detail-item__value detail-item__value--mono">{{ virement.reference }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">Date de création</div><div class="detail-item__value">{{ virement.dateCreation }} à {{ virement.heureCreation }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">SOP</div><div class="detail-item__value"><span class="badge badge--navy">{{ virement.sop }}</span></div></div>
+          <div class="detail-item"><div class="detail-item__label">Motif</div><div class="detail-item__value">{{ virement.motif || '-' }}</div></div>
+          <div class="detail-item"><div class="detail-item__label">Dernière mise à jour</div><div class="detail-item__value">{{ virement.updatedAt || '-' }}</div></div>
         </div>
-
       </div>
     </div>
 
-    <!-- Historique -->
-    <div class="bmce-card flex-1">
-      <div class="bmce-card__header">
-        <div class="bmce-card__title">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--bmce-navy)" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/>
-          </svg>
-          Suivi du traitement
-        </div>
-      </div>
+    <div class="bmce-card flex-1 vir-timeline-card">
+      <div class="bmce-card__header"><div class="bmce-card__title">Suivi du traitement</div></div>
       <div class="bmce-card__body">
         <div class="timeline">
           <div *ngFor="let etape of virement.historique" class="tl-item">
@@ -162,21 +88,6 @@
               <div class="tl-date">{{ etape.date }}</div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="bmce-card card-raw" *ngIf="!loading && !error">
-    <div class="bmce-card__header">
-      <div class="bmce-card__title">Données techniques du virement</div>
-    </div>
-    <div class="bmce-card__body">
-      <div class="raw-grid">
-        <div class="raw-item" *ngFor="let field of rawFields">
-          <div class="raw-item__label">{{ field.key }}</div>
-          <div class="raw-item__value">{{ field.value }}</div>
         </div>
       </div>
     </div>
